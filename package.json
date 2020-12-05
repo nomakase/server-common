@@ -1,0 +1,32 @@
+{
+  "name": "nomakase",
+  "version": "1.0.0",
+  "description": "server for the project, \"Nomakase\"",
+  "main": "bin/www",
+  "scripts": {
+    "build": "tsc --project ./",
+    "start": "node bin/www > /dev/null 2>&1",
+    "dev-start": "node bin/www",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nomakase/server-common.git"
+  },
+  "author": "Team NoYes",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/nomakase/server-common/issues"
+  },
+  "homepage": "https://github.com/nomakase/server-common#readme",
+  "devDependencies": {
+    "@types/express": "^4.17.9",
+    "@types/node": "^14.14.10",
+    "ts-node": "^9.1.0",
+    "typescript": "^4.1.2"
+  },
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1"
+  }
+}
