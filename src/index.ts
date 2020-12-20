@@ -6,7 +6,7 @@ async function main() {
   const app = express();
   const port = normalizePort(process.env.PORT);
 
-  // TODO: Need to change ormconfig.ts for connect nomakase DB 
+  // TODO: Need to change ormconfig.ts for connect nomakase DB
   // const connection = await createConnection(ormconfig);
 
   app.get("/", (_req, res) => {
