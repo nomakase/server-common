@@ -1,4 +1,4 @@
 export default interface OAuth {
-    authenticate(token: string): Promise<boolean>
-    getUserInfo(): string
+  authenticate(token: string): Promise<boolean>;
+  getUserInfo(): string;
 }
