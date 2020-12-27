@@ -20,8 +20,8 @@ export default class AuthService {
         let exist = true
         
         if (!exist) {
-            let error = new Error("Invalid user signature.");
-            error.name = "InvalidUserSigError";
+            let error = new Error("Not registered user.");
+            error.name = "NoMatchedUserError";
             
             throw error;
         }
