@@ -29,12 +29,15 @@ export default class JWT {
     
     /* REFRESH TOKEN */
     signRefresh = (payload: object) => jwt.sign(payload, this.secretKeyR, this.optionsR)
-    verifyRefresh = (token: string, clientInfo: any) => {
+    verifyRefresh = (refreshToken: string, accessToken: string, deviceID: string) => {
         try{
-            const payload: any = jwt.verify(token, this.secretKeyR)
+            const payload: any = jwt.verify(refreshToken, this.secretKeyR)
             
-            if ((payload.androidID == clientInfo.androidID) 
-                && (payload.accessToken == clientInfo.accessToken)) {
+            if ((payload.androidID == deviceID) 
+                && (payload.accessToken == accessToken)) {
+                    
+                return jwt.decode(payload.accessToken);
+            } else {
                 let error = new Error("Invalid client info.")
                 error.name = "InvalidClientError"
                 
