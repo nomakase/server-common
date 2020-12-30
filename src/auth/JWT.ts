@@ -17,7 +17,7 @@ export default class JWT {
   };
 
   /* ACCESS TOKEN */
-  signAccess = (payload: object) =>
+  signAccess = (payload: AccessTokenPayload) =>
     jwt.sign(payload, this.secretKeyA, this.optionsA);
   verifyAccess = (token: string) => {
     try {
@@ -28,7 +28,7 @@ export default class JWT {
   };
 
   /* REFRESH TOKEN */
-  signRefresh = (payload: object) =>
+  signRefresh = (payload: RefreshTokenPayload) =>
     jwt.sign(payload, this.secretKeyR, this.optionsR);
   verifyRefresh = (
     refreshToken: string,
@@ -36,10 +36,13 @@ export default class JWT {
     deviceID: string
   ) => {
     try {
-      const payload: any = jwt.verify(refreshToken, this.secretKeyR);
+      const payload: RefreshTokenPayload = <RefreshTokenPayload>(
+        jwt.verify(refreshToken, this.secretKeyR)
+      );
 
-      if (payload.androidID == deviceID && payload.accessToken == accessToken) {
-        return jwt.decode(payload.accessToken);
+      // TODO: hash {accessToken} and compare with {payload.hashedToken}
+      if (payload.deviceID == deviceID && payload.hashedToken == accessToken) {
+        return jwt.decode(accessToken);
       } else {
         let error = new Error("Invalid client info.");
         error.name = "InvalidClientError";
@@ -51,3 +54,35 @@ export default class JWT {
     }
   };
 }
+
+class AccessTokenPayload {
+  private readonly _email: string;
+
+  constructor(email: string) {
+    this._email = email;
+  }
+
+  get email(): string {
+    return this._email;
+  }
+}
+
+class RefreshTokenPayload {
+  private readonly _hashedToken: string;
+  private readonly _deviceID: string;
+
+  constructor(hashedToken: string, deviceID: string) {
+    this._hashedToken = hashedToken;
+    this._deviceID = deviceID;
+  }
+
+  get hashedToken(): string {
+    return this._hashedToken;
+  }
+
+  get deviceID(): string {
+    return this._deviceID;
+  }
+}
+
+export { AccessTokenPayload, RefreshTokenPayload };

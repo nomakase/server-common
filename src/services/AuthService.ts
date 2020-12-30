@@ -1,5 +1,5 @@
 import OAuth from "../auth/interface/OAuth";
-import JWT from "../auth/JWT";
+import JWT, { AccessTokenPayload, RefreshTokenPayload } from "../auth/JWT";
 
 export default class AuthService {
   private jwt = new JWT();
@@ -46,16 +46,16 @@ export default class AuthService {
   }
 
   private signTokenPair(email: string, deviceID: string) {
-    let accessTokenPayload = { email: email };
+    let accessTokenPayload = new AccessTokenPayload(email);
     let accessToken = this.jwt.signAccess(accessTokenPayload);
 
     // TODO: Hash access token
     let hashedAccessToken = accessToken + "";
 
-    let refreshTokenPayload = {
-      hashed: hashedAccessToken,
-      device: deviceID,
-    };
+    let refreshTokenPayload = new RefreshTokenPayload(
+      hashedAccessToken,
+      deviceID
+    );
     let refreshToken = this.jwt.signRefresh(refreshTokenPayload);
 
     return { accessToken, refreshToken };
