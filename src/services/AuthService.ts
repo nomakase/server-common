@@ -6,9 +6,9 @@ export default class AuthService {
 
   constructor(private oauth: OAuth) {}
 
-  signIn(tokenOrAccessCode: string, deviceID: string) {
-    if (!this.oauth.authenticate(tokenOrAccessCode)) {
-      let error = new Error("Invalid user signature.");
+  async signIn(tokenOrAccessCode: string, deviceID: string) {
+    if (!(await this.oauth.authenticate(tokenOrAccessCode))) {
+      const error = new Error("Invalid user signature.");
       error.name = "InvalidUserSigError";
 
       throw error;
@@ -19,7 +19,7 @@ export default class AuthService {
     let exist = true;
 
     if (!exist) {
-      let error = new Error("Not registered user.");
+      const error = new Error("Not registered user.");
       error.name = "NoMatchedUserError";
 
       throw error;
@@ -33,7 +33,7 @@ export default class AuthService {
    **/
   signInAuto(refreshToken: string, accessToken: string, deviceID: string) {
     try {
-      let decodedUserInfo: any = this.jwt.verifyRefresh(
+      const decodedUserInfo: any = this.jwt.verifyRefresh(
         refreshToken,
         accessToken,
         deviceID
@@ -46,17 +46,17 @@ export default class AuthService {
   }
 
   private signTokenPair(email: string, deviceID: string) {
-    let accessTokenPayload = new AccessTokenPayload(email);
-    let accessToken = this.jwt.signAccess(accessTokenPayload);
+    const accessTokenPayload = new AccessTokenPayload(email);
+    const accessToken = this.jwt.signAccess(accessTokenPayload);
 
     // TODO: Hash access token
-    let hashedAccessToken = accessToken + "";
+    const hashedAccessToken = accessToken + "";
 
-    let refreshTokenPayload = new RefreshTokenPayload(
+    const refreshTokenPayload = new RefreshTokenPayload(
       hashedAccessToken,
       deviceID
     );
-    let refreshToken = this.jwt.signRefresh(refreshTokenPayload);
+    const refreshToken = this.jwt.signRefresh(refreshTokenPayload);
 
     return { accessToken, refreshToken };
   }

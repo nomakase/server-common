@@ -36,15 +36,16 @@ export default class JWT {
     deviceID: string
   ) => {
     try {
-      const payload: RefreshTokenPayload = <RefreshTokenPayload>(
-        jwt.verify(refreshToken, this.secretKeyR)
-      );
+      const payload: RefreshTokenPayload = jwt.verify(
+        refreshToken,
+        this.secretKeyR
+      ) as RefreshTokenPayload;
 
       // TODO: hash {accessToken} and compare with {payload.hashedToken}
       if (payload.deviceID == deviceID && payload.hashedToken == accessToken) {
         return jwt.decode(accessToken);
       } else {
-        let error = new Error("Invalid client info.");
+        const error = new Error("Invalid client info.");
         error.name = "InvalidClientError";
 
         throw error;
@@ -55,6 +56,7 @@ export default class JWT {
   };
 }
 
+// TODO: change into type
 class AccessTokenPayload {
   private readonly _email: string;
 

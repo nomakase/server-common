@@ -1,10 +1,10 @@
-import { OAuth2Client } from "google-auth-library";
+import { OAuth2Client, TokenPayload } from "google-auth-library";
 import OAuth from "./interface/OAuth";
 
 export default class GoogleOAuth implements OAuth {
   private readonly CLIENT_ID = process.env.GOOGLE_OAUTH_CLIENT_ID;
 
-  private userInfo: any;
+  private userInfo?: TokenPayload;
   private client = new OAuth2Client(this.CLIENT_ID);
 
   async authenticate(token: string) {
@@ -12,8 +12,8 @@ export default class GoogleOAuth implements OAuth {
       idToken: token,
       audience: this.CLIENT_ID, // Specify the CLIENT_ID of the app that accesses the backend
     });
-    const userInfo: any = ticket.getPayload();
-    const email = userInfo["email"];
+    const userInfo = ticket.getPayload();
+    const email = userInfo?.email;
     if (email) {
       this.userInfo = userInfo;
       return true;
@@ -23,6 +23,6 @@ export default class GoogleOAuth implements OAuth {
   }
 
   getUserInfo() {
-    return this.userInfo["email"];
+    return this.userInfo ? this.userInfo.email + "" : "";
   }
 }
