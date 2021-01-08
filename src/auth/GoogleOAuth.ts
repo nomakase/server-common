@@ -8,13 +8,16 @@ export default class GoogleOAuth implements OAuth {
   private client = new OAuth2Client(this.CLIENT_ID);
 
   async authenticate(token: string) {
-    const ticket = await this.client.verifyIdToken({
+    let ticket: any = {};
+    ticket = await this.client.verifyIdToken({
       idToken: token,
       audience: this.CLIENT_ID, // Specify the CLIENT_ID of the app that accesses the backend
     });
+
     const userInfo = ticket.getPayload();
     const email = userInfo?.email;
     if (email) {
+      console.log(email);
       this.userInfo = userInfo;
       return true;
     }

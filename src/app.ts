@@ -8,6 +8,8 @@ app.use("/", (_req, _res, _next) => {
   _next();
 });
 
+app.use(express.json());
+
 app.use("/", authRouter);
 
 addErrorHandlers(app);
