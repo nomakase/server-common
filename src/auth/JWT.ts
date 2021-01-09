@@ -18,7 +18,7 @@ export default class JWT {
 
   /* ACCESS TOKEN */
   signAccess = (payload: AccessTokenPayload) =>
-    jwt.sign(payload, this.secretKeyA, this.optionsA);
+    jwt.sign({ payload }, this.secretKeyA, this.optionsA);
   verifyAccess = (token: string) => {
     try {
       jwt.verify(token, this.secretKeyA);
@@ -29,21 +29,25 @@ export default class JWT {
 
   /* REFRESH TOKEN */
   signRefresh = (payload: RefreshTokenPayload) =>
-    jwt.sign(payload, this.secretKeyR, this.optionsR);
+    jwt.sign({ payload }, this.secretKeyR, this.optionsR);
   verifyRefresh = (
     refreshToken: string,
     accessToken: string,
     deviceID: string
   ) => {
     try {
-      const payload: RefreshTokenPayload = jwt.verify(
-        refreshToken,
-        this.secretKeyR
-      ) as RefreshTokenPayload;
+      const payload = (jwt.verify(refreshToken, this.secretKeyR) as any)
+        .payload;
 
       // TODO: hash {accessToken} and compare with {payload.hashedToken}
-      if (payload.deviceID == deviceID && payload.hashedToken == accessToken) {
-        return jwt.decode(accessToken);
+      if (
+        payload._deviceID == deviceID &&
+        payload._hashedToken == accessToken
+      ) {
+        const decodedAccessTokenPayload = (jwt.decode(accessToken) as any)
+          .payload;
+
+        return new AccessTokenPayload(decodedAccessTokenPayload._email);
       } else {
         const error = new Error("Invalid client info.");
         error.name = "InvalidClientError";

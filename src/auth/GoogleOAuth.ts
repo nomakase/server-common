@@ -17,7 +17,6 @@ export default class GoogleOAuth implements OAuth {
     const userInfo = ticket.getPayload();
     const email = userInfo?.email;
     if (email) {
-      console.log(email);
       this.userInfo = userInfo;
       return true;
     }

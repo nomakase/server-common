@@ -9,10 +9,47 @@ router.post("/signIn", async (req, res, next) => {
   const auth = new AuthService(new GoogleOAuth());
 
   try {
+    if (!(deviceID && oauthToken)) {
+      throw new Error("Missing parameters for signing in. (/signIn)");
+    }
+
     const { accessToken, refreshToken } = await auth.signIn(
       oauthToken,
       deviceID
     );
+
+    console.log("signIn: success.");
+    res.json({
+      accessToken: accessToken,
+      refreshToken: refreshToken,
+    });
+  } catch (err) {
+    // TODO: deal with err separately
+    console.log(err);
+    next({ code: 403 });
+  }
+});
+
+router.post("/signInAuto", (req, res, next) => {
+  const _accessToken = req.body.accessToken;
+  const _refreshToken = req.body.refreshToken;
+  const deviceID = req.body.deviceID;
+
+  // No need OAuth service.
+  const auth = new AuthService(null);
+
+  try {
+    if (!(_accessToken && _refreshToken && deviceID)) {
+      throw new Error("Missing parameters for signing in. (/signInAuto)");
+    }
+
+    const { accessToken, refreshToken } = auth.signInAuto(
+      _refreshToken,
+      _accessToken,
+      deviceID
+    );
+
+    console.log("signInAuto: success.");
     res.json({
       accessToken: accessToken,
       refreshToken: refreshToken,
