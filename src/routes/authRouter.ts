@@ -36,7 +36,7 @@ router.post("/signInAuto", (req, res, next) => {
   const deviceID = req.body.deviceID;
 
   // No need OAuth service.
-  const auth = new AuthService(null);
+  const auth = new AuthService();
 
   try {
     if (!(_accessToken && _refreshToken && deviceID)) {

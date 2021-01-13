@@ -4,10 +4,10 @@ import JWT, { AccessTokenPayload, RefreshTokenPayload } from "../auth/JWT";
 export default class AuthService {
   private jwt = new JWT();
 
-  constructor(private oauth: OAuth) {}
+  constructor(private oauth?: OAuth) {}
 
   async signIn(tokenOrAccessCode: string, deviceID: string) {
-    if (!(await this.oauth.authenticate(tokenOrAccessCode))) {
+    if (!(await this.oauth?.authenticate(tokenOrAccessCode))) {
       const error = new Error("Invalid user signature.");
       error.name = "InvalidUserSigError";
 
@@ -15,10 +15,10 @@ export default class AuthService {
     }
 
     // TODO: Check the user info exists in our DB.
-    const email = this.oauth.getUserInfo();
+    const email = this.oauth?.getUserInfo();
     let exist = true;
 
-    if (!exist) {
+    if (!email || !exist) {
       const error = new Error("Not registered user.");
       error.name = "NoMatchedUserError";
 
