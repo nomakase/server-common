@@ -1,8 +1,9 @@
 import jwt from "jsonwebtoken";
+import hash from "../utils/hash";
 
 export default class JWT {
-  private secretKeyA = process.env.ACCESS_SECRET + "";
-  private secretKeyR = process.env.REFRESH_SECRET + "";
+  private secretKeyA = process.env.ACCESS_SECRET as jwt.Secret;
+  private secretKeyR = process.env.REFRESH_SECRET as jwt.Secret;
 
   private optionsA = {
     expiresIn: process.env.ACCESS_TOKEN_EXPIRE,
@@ -39,10 +40,10 @@ export default class JWT {
       const payload = (jwt.verify(refreshToken, this.secretKeyR) as any)
         .payload;
 
-      // TODO: hash {accessToken} and compare with {payload.hashedToken}
+      // Hash {accessToken} and compare with {payload.hashedToken}.
       if (
         payload._deviceID == deviceID &&
-        payload._hashedToken == accessToken
+        payload._hashedToken == hash(accessToken)
       ) {
         const decodedAccessTokenPayload = (jwt.decode(accessToken) as any)
           .payload;

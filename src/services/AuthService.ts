@@ -1,3 +1,4 @@
+import hash from "../utils/hash";
 import OAuth from "../auth/interface/OAuth";
 import JWT, { AccessTokenPayload, RefreshTokenPayload } from "../auth/JWT";
 
@@ -49,11 +50,9 @@ export default class AuthService {
     const accessTokenPayload = new AccessTokenPayload(email);
     const accessToken = this.jwt.signAccess(accessTokenPayload);
 
-    // TODO: Hash access token
-    const hashedAccessToken = accessToken + "";
-
+    // Use hashed access token.
     const refreshTokenPayload = new RefreshTokenPayload(
-      hashedAccessToken,
+      hash(accessToken),
       deviceID
     );
     const refreshToken = this.jwt.signRefresh(refreshTokenPayload);
