@@ -2,43 +2,42 @@ import jwt from "jsonwebtoken";
 import hash from "../utils/hash";
 
 export default class JWT {
-  private secretKeyA = process.env.ACCESS_SECRET as jwt.Secret;
-  private secretKeyR = process.env.REFRESH_SECRET as jwt.Secret;
+  private static secretKeyA = process.env.ACCESS_SECRET as jwt.Secret;
+  private static secretKeyR = process.env.REFRESH_SECRET as jwt.Secret;
 
-  private optionsA = {
+  private static optionsA = {
     expiresIn: process.env.ACCESS_TOKEN_EXPIRE,
     issuer: process.env.TOKEN_ISSUER,
     subject: process.env.TOKEN_SUBJECT,
   };
 
-  private optionsR = {
+  private static optionsR = {
     expiresIn: process.env.REFRESH_TOKEN_EXPIRE,
     issuer: process.env.TOKEN_ISSUER,
     subject: process.env.TOKEN_SUBJECT,
   };
 
   /* ACCESS TOKEN */
-  signAccess = (payload: AccessTokenPayload) =>
-    jwt.sign({ payload }, this.secretKeyA, this.optionsA);
-  verifyAccess = (token: string) => {
+  static signAccess = (payload: AccessTokenPayload) =>
+    jwt.sign({ payload }, JWT.secretKeyA, JWT.optionsA);
+  static verifyAccess = (token: string) => {
     try {
-      jwt.verify(token, this.secretKeyA);
+      jwt.verify(token, JWT.secretKeyA);
     } catch (error) {
       throw error;
     }
   };
 
   /* REFRESH TOKEN */
-  signRefresh = (payload: RefreshTokenPayload) =>
-    jwt.sign({ payload }, this.secretKeyR, this.optionsR);
-  verifyRefresh = (
+  static signRefresh = (payload: RefreshTokenPayload) =>
+    jwt.sign({ payload }, JWT.secretKeyR, JWT.optionsR);
+  static verifyRefresh = (
     refreshToken: string,
     accessToken: string,
     deviceID: string
   ) => {
     try {
-      const payload = (jwt.verify(refreshToken, this.secretKeyR) as any)
-        .payload;
+      const payload = (jwt.verify(refreshToken, JWT.secretKeyR) as any).payload;
 
       // Hash {accessToken} and compare with {payload.hashedToken}.
       if (

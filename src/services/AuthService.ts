@@ -3,8 +3,6 @@ import OAuth from "../auth/interface/OAuth";
 import JWT, { AccessTokenPayload, RefreshTokenPayload } from "../auth/JWT";
 
 export default class AuthService {
-  private jwt = new JWT();
-
   constructor(private oauth?: OAuth) {}
 
   async signIn(tokenOrAccessCode: string, deviceID: string) {
@@ -34,7 +32,7 @@ export default class AuthService {
    **/
   signInAuto(refreshToken: string, accessToken: string, deviceID: string) {
     try {
-      const decodedUserInfo: any = this.jwt.verifyRefresh(
+      const decodedUserInfo: any = JWT.verifyRefresh(
         refreshToken,
         accessToken,
         deviceID
@@ -48,14 +46,14 @@ export default class AuthService {
 
   private signTokenPair(email: string, deviceID: string) {
     const accessTokenPayload = new AccessTokenPayload(email);
-    const accessToken = this.jwt.signAccess(accessTokenPayload);
+    const accessToken = JWT.signAccess(accessTokenPayload);
 
     // Use hashed access token.
     const refreshTokenPayload = new RefreshTokenPayload(
       hash(accessToken),
       deviceID
     );
-    const refreshToken = this.jwt.signRefresh(refreshTokenPayload);
+    const refreshToken = JWT.signRefresh(refreshTokenPayload);
 
     return { accessToken, refreshToken };
   }
