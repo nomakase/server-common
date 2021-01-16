@@ -1,4 +1,5 @@
 import { ConnectionOptions } from "typeorm";
+import { Manager } from "../entities/Manager";
 
 // TODO: Should connect nomakase DB
 const ormconfig: ConnectionOptions = {
@@ -9,7 +10,7 @@ const ormconfig: ConnectionOptions = {
   password: process.env.DB_PASSWORD,
   database: process.env.DB_DATABASE,
   synchronize: true,
-  entities: ["src/entity/**/*.ts"],
+  entities: [Manager],
   migrations: ["src/migration/**/*.ts"],
 };
 
