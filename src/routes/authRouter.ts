@@ -24,9 +24,10 @@ router.post("/signIn", async (req, res, next) => {
       refreshToken: refreshToken,
     });
   } catch (err) {
-    // TODO: deal with err separately
-    console.log(err);
-    next({ code: 403 });
+    err.code = 401;
+    console.error(err);
+
+    next(err);
   }
 });
 
@@ -55,9 +56,10 @@ router.post("/signInAuto", (req, res, next) => {
       refreshToken: refreshToken,
     });
   } catch (err) {
-    // TODO: deal with err separately
-    console.log(err);
-    next({ code: 403 });
+    err.code = 401;
+    console.error(err);
+
+    next(err);
   }
 });
 
