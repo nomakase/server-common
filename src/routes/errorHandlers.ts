@@ -4,8 +4,7 @@ export default function addErrorHandlers(app: express.Application) {
   /* 404 ERROR */
   app.use((_req, res) => {
     res.status(404).json({
-      success: false,
-      message: "Not Found.",
+      message: "Not Found."
     });
   });
 
@@ -20,8 +19,7 @@ export default function addErrorHandlers(app: express.Application) {
       if (err.code == 401) {
         console.log("Auth Failed - " + err.code + req.originalUrl);
         res.status(err.code || 401).json({
-          success: false,
-          message: "Unauthorized : Access to this resource is denied.",
+          message: "Unauthorized : Access to this resource is denied."
         });
       } else {
         next(err);
@@ -40,8 +38,7 @@ export default function addErrorHandlers(app: express.Application) {
       if (err.code == 403) {
         console.log("Auth Failed - " + err.code + req.originalUrl);
         res.status(err.code || 403).json({
-          success: false,
-          message: "Forbidden : Access to this resource is denied.",
+          message: "Forbidden : Access to this resource is denied."
         });
       } else {
         next(err);
@@ -59,9 +56,8 @@ export default function addErrorHandlers(app: express.Application) {
     ) => {
       console.log("Internal Server Error - " + err.code + req.originalUrl);
       res.status(err.status || 500).json({
-        success: false,
         message:
-          "Internal Server Error : The server has been deserted for a while.",
+          "Internal Server Error : The server has been deserted for a while."
       });
     }
   );
