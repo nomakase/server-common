@@ -5,7 +5,6 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from "typeorm";
-import { Period } from "./Period";
 import { RestaurantPhoto } from "./RestaurantPhoto";
 
 @Entity()
@@ -16,14 +15,17 @@ export class Restaurant extends BaseEntity {
   @Column()
   name: string;
 
-  @Column()
+  @Column({ unique: true })
   phoneNumber: string;
 
   @Column()
   address: string;
 
-  @Column((_type) => Period)
-  OpenPeriod: Period;
+  @Column()
+  open: string;
+
+  @Column()
+  close: string;
 
   @Column({ nullable: true })
   description: string;

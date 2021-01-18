@@ -6,7 +6,6 @@ import {
   PrimaryGeneratedColumn,
 } from "typeorm";
 import { NoShowPhoto } from "./NoShowPhoto";
-import { Period } from "./Period";
 
 @Entity()
 export class NoShow extends BaseEntity {
@@ -22,8 +21,11 @@ export class NoShow extends BaseEntity {
   @Column()
   salePrice: number;
 
-  @Column((_type) => Period)
-  salePeriod: Period;
+  @Column()
+  from: Date;
+
+  @Column()
+  to: Date;
 
   @Column({ default: 1 })
   skeleton: number;
