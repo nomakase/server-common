@@ -1,9 +1,10 @@
 import express from "express";
 import AuthService from "../services/AuthService";
 import GoogleOAuth from "../auth/GoogleOAuth";
+import { TypedResponse } from "./interface";
 const router = express.Router();
 
-router.post("/signIn", async (req, res, next) => {
+router.post("/signIn", async (req, res: TypedResponse<{accessToken: string, refreshToken: string}>, next) => {
   const oauthToken = req.body.OAuthToken;
   const deviceID = req.body.deviceID;
   const auth = new AuthService(new GoogleOAuth());

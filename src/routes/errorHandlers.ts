@@ -1,8 +1,9 @@
 import express from "express";
+import { AppResponse } from "./interface";
 
 export default function addErrorHandlers(app: express.Application) {
   /* 404 ERROR */
-  app.use((_req, res) => {
+  app.use((_req, res: AppResponse) => {
     res.status(404).json({
       success: false,
       message: "Not Found.",
@@ -14,7 +15,7 @@ export default function addErrorHandlers(app: express.Application) {
     (
       err: any,
       req: express.Request,
-      res: express.Response,
+      res: AppResponse,
       next: express.NextFunction
     ) => {
       if (err.code == 401) {
@@ -34,7 +35,7 @@ export default function addErrorHandlers(app: express.Application) {
     (
       err: any,
       req: express.Request,
-      res: express.Response,
+      res: AppResponse,
       next: express.NextFunction
     ) => {
       if (err.code == 403) {
@@ -54,7 +55,7 @@ export default function addErrorHandlers(app: express.Application) {
     (
       err: any,
       req: express.Request,
-      res: express.Response,
+      res: AppResponse,
       _next: express.NextFunction
     ) => {
       console.log("Internal Server Error - " + err.code + req.originalUrl);
