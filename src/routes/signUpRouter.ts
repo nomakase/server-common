@@ -1,34 +1,32 @@
 import express from "express";
 import { Manager } from "../entities/Manager";
 import hash from "../utils/hash";
+import { AppResponse } from "./interface";
 
 const router = express.Router();
 
-router.post("/", async (req, res) => {
-  const { email, password }: { email?: string, password?: string } = req.body;
+router.post("/", async (req, res: AppResponse) => {
+  const { email, password }: Partial<Pick<Manager, "email" | "password">> = req.body;
 
   if (!email || !password) {
-    res.send({
+    return res.json({
       success: false,
       message: "Invalid : Please check json"
     })
-    return;
   }
 
   if (!email.includes("@")) {
-    res.send({
+    return res.json({
       success: false,
       message: "Invalid : Please check email address",
     })
-    return;
   }
 
   if (password.length <= 2) {
-    res.send({
+    return res.json({
       success: false,
       message: "Invalid : Password must be longer than 2",
     });
-    return;
   }
 
   const hashedPassword = hash(password);
@@ -44,15 +42,14 @@ router.post("/", async (req, res) => {
   } catch (err) {
     // console.log(err);
     if (err.errno === 1062) {
-      res.send({
+      return res.json({
         success: false,
         message: `Duplicate : ${email} has already taken`
       })
     }
-    return;
   }
 
-  res.send({
+  return res.json({
     success: true
   })
 });
