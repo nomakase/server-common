@@ -7,7 +7,4 @@ export class Manager extends BaseEntity {
 
   @Column({ unique: true })
   email: string;
-
-  @Column()
-  password: string;
 }

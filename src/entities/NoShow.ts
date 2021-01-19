@@ -13,12 +13,9 @@ export class NoShow extends BaseEntity {
   id: number;
 
   @Column()
-  mealTime: Date;
-
-  @Column()
   costPrice: number;
 
-  @Column()
+  @Column({ nullable: true })
   salePrice: number;
 
   @Column()

@@ -6,6 +6,7 @@ import {
   PrimaryGeneratedColumn,
 } from "typeorm";
 import { RestaurantPhoto } from "./RestaurantPhoto";
+import { Time } from "./Time";
 
 @Entity()
 export class Restaurant extends BaseEntity {
@@ -21,11 +22,11 @@ export class Restaurant extends BaseEntity {
   @Column()
   address: string;
 
-  @Column()
-  open: string;
+  @Column(() => Time)
+  openningHour: Time;
 
-  @Column()
-  close: string;
+  @Column(() => Time)
+  breakTime: Time;
 
   @Column({ nullable: true })
   description: string;

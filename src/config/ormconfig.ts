@@ -3,6 +3,7 @@ import { Manager } from "../entities/Manager";
 import { Photo } from "../entities/Photo";
 import { Restaurant } from "../entities/Restaurant";
 import { RestaurantPhoto } from "../entities/RestaurantPhoto";
+import { Time } from "../entities/Time";
 
 // TODO: Should connect nomakase DB
 const ormconfig: ConnectionOptions = {
@@ -13,7 +14,7 @@ const ormconfig: ConnectionOptions = {
   password: process.env.DB_PASSWORD,
   database: process.env.DB_DATABASE,
   synchronize: true,
-  entities: [Manager, Restaurant, RestaurantPhoto, Photo],
+  entities: [Manager, Restaurant, RestaurantPhoto, Photo, Time],
   migrations: ["src/migration/**/*.ts"],
 };
 
