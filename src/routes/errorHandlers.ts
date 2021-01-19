@@ -3,7 +3,7 @@ import { ErrorResponse, CustomError } from "../@types/errorHandlers";
 
 export default function addErrorHandlers(app: express.Application) {
   /* 404 ERROR */
-  app.use((_req, res: AppResponse) => {
+  app.use((_req, res: ErrorResponse) => {
     res.status(404).json({
       type: "NotFoundError",
       status: 404,
@@ -16,7 +16,6 @@ export default function addErrorHandlers(app: express.Application) {
       err: CustomError,
       req: express.Request,
       res: ErrorResponse,
-      _next: express.NextFunction
     ) => {
       console.log(err.code + " " + req.originalUrl);
       res.status(err.code).json({
