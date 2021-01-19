@@ -1,7 +1,7 @@
 import express from "express";
 import AuthService from "../services/AuthService";
 import GoogleOAuth from "../auth/GoogleOAuth";
-import { TypedResponse } from "./interface";
+import { TypedResponse } from "../@types/errorHandlers";
 const router = express.Router();
 
 router.post("/signIn", async (req, res: TypedResponse<{accessToken: string, refreshToken: string}>, next) => {
