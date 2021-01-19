@@ -1,57 +1,45 @@
 import express from "express";
 import { Manager } from "../entities/Manager";
-import hash from "../utils/hash";
-import { AppResponse } from "./interface";
 
 const router = express.Router();
 
-router.post("/", async (req, res: AppResponse) => {
-  const { email, password }: Partial<Pick<Manager, "email" | "password">> = req.body;
+router.post("/", async (req, res, next) => {
+  const { email }: Partial<Manager> = req.body;
 
-  if (!email || !password) {
-    return res.json({
-      success: false,
-      message: "Invalid : Please check json"
-    })
+  if (!email) {
+    const error: any = new Error("Please input email")
+    error.code = 400;
+    error.type = "Unexpected Email";
+    
+    next(error);
   }
 
-  if (!email.includes("@")) {
-    return res.json({
-      success: false,
-      message: "Invalid : Please check email address",
-    })
+  else if (!email.includes("@")) {
+    const error: any = new Error("Please check email address");
+    error.code = 400;
+    error.type = "Unexpected Email";
+
+    next(error);
   }
 
-  if (password.length <= 2) {
-    return res.json({
-      success: false,
-      message: "Invalid : Password must be longer than 2",
-    });
-  }
-
-  const hashedPassword = hash(password);
+  let managerId: number;
   try {
-    const insertResult = await Manager.insert({
-      email,
-      password: hashedPassword
-    })
+    const insertResult = await Manager.insert({ email })
 
     // TODO: 해당 유저 ID로 자동로그인할 수 있도록 합니다.
-    const userId = insertResult.identifiers[0].id;
-    console.log(userId);
+    managerId = insertResult.identifiers[0].id;
   } catch (err) {
     // console.log(err);
     if (err.errno === 1062) {
-      return res.json({
-        success: false,
-        message: `Duplicate : ${email} has already taken`
-      })
+      err.code = 500;
+      err.type = "Duplicated Email"
+      err.message `${email} has already taken`
+      next(err)
     }
+    return;
   }
 
-  return res.json({
-    success: true
-  })
+  return res.json({ id: managerId })
 });
 
 export default router;
