@@ -1,7 +1,7 @@
 import express from "express";
 import AuthService from "../services/AuthService";
 import GoogleOAuth from "../auth/GoogleOAuth";
-import { TypedResponse } from "express-custom-types";
+import { TypedResponse } from "@custom-types/express";
 
 const router = express.Router();
 

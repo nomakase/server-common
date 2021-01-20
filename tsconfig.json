@@ -22,8 +22,8 @@
     "resolveJsonModule": true,
     "baseUrl": "./",
     "paths": {
-      "*": ["@types/*", "*"],
-      //"types": ["@types/*"],
+      "*": ["*"],
+      "@custom-types/*": ["@types/*"],
     },
     "typeRoots": ["./node_modules/@types", "./@types"]
   },
