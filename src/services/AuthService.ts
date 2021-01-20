@@ -1,5 +1,5 @@
 import hash from "../utils/hash";
-import OAuth from "../auth/interface/OAuth";
+import OAuth from "../auth/OAuth/interface/OAuth";
 import JWT, { AccessTokenPayload, RefreshTokenPayload } from "../auth/JWT";
 
 export default class AuthService {

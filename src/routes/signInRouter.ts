@@ -1,12 +1,12 @@
 import express from "express";
 import AuthService from "../services/AuthService";
-import GoogleOAuth from "../auth/GoogleOAuth";
+import GoogleOAuth from "../auth/OAuth/GoogleOAuth";
 import { TypedResponse } from "@custom-types/express";
 
 const router = express.Router();
 
 router.post(
-  "/",
+  "/signIn",
   async (
     req,
     res: TypedResponse<{ accessToken: string; refreshToken: string }>,
@@ -14,13 +14,13 @@ router.post(
   ) => {
     const oauthToken = req.body.OAuthToken;
     const deviceID = req.body.deviceID;
-    const auth = new AuthService(new GoogleOAuth());
 
     try {
       if (!(deviceID && oauthToken)) {
         throw new Error("Missing parameters for signing in. (/signIn)");
       }
 
+      const auth = new AuthService(new GoogleOAuth());
       const { accessToken, refreshToken } = await auth.signIn(
         oauthToken,
         deviceID
