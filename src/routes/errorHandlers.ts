@@ -1,5 +1,5 @@
 import express from "express";
-import { ErrorResponse, CustomError } from "../@types/errorHandlers";
+import { ErrorResponse, CustomError } from "express-custom-types";
 
 export default function addErrorHandlers(app: express.Application) {
   /* 404 ERROR */
@@ -16,6 +16,7 @@ export default function addErrorHandlers(app: express.Application) {
       err: CustomError,
       req: express.Request,
       res: ErrorResponse,
+      _n: express.NextFunction
     ) => {
       console.log(err.code + " " + req.originalUrl);
       res.status(err.code).json({
