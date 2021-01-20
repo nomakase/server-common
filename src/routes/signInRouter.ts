@@ -6,7 +6,7 @@ import { TypedResponse } from "@custom-types/express";
 const router = express.Router();
 
 router.post(
-  "/signIn",
+  "/",
   async (
     req,
     res: TypedResponse<{ accessToken: string; refreshToken: string }>,
