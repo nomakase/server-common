@@ -7,4 +7,16 @@ export class Manager extends BaseEntity {
 
   @Column({ unique: true })
   email: string;
+  
+  @Column({ nullable: true, default: false })
+  accessToken: string;
+  
+  @Column({ nullable: true, default: false })
+  refreshToken: string;
+  
+  @Column({ default: false })
+  isSubmitted: boolean;
+  
+  @Column({ default: false })
+  isApproved: boolean;
 }
