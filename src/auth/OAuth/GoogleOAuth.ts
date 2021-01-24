@@ -7,6 +7,8 @@ export default class GoogleOAuth implements OAuth {
   private userInfo?: TokenPayload;
   private client = new OAuth2Client(this.CLIENT_ID);
 
+  readonly serverName = "google";
+
   async authenticate(token: string) {
     let ticket: any = {};
     ticket = await this.client.verifyIdToken({
