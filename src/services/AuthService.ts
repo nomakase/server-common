@@ -1,5 +1,6 @@
 import hash from "../utils/hash";
 import OAuth from "../auth/OAuth/interface/OAuth";
+import { Manager } from "../entities/Manager";
 import JWT, { AccessTokenPayload, RefreshTokenPayload } from "../auth/JWT";
 
 export default class AuthService {
@@ -13,18 +14,34 @@ export default class AuthService {
       throw error;
     }
 
-    // TODO: Check the user info exists in our DB.
+    // In case user disallows to access email info. 
     const email = this.oauth?.getUserInfo();
-    let exist = true;
+    if (!email) {
+      const error = new Error("Email required.");
+      error.name = "NoEmailError";
 
-    if (!email || !exist) {
+      throw error;
+    }
+
+    let userToSignIn = await Manager.findOne({ where: { email: email } });
+    if (!userToSignIn) {
       const error = new Error("Not registered user.");
       error.name = "NoMatchedUserError";
 
       throw error;
     }
 
-    return this.signTokenPair(email, deviceID);
+    if (userToSignIn.accessToken || userToSignIn.refreshToken) {
+      this._revokeTokenpair(userToSignIn.accessToken, userToSignIn.refreshToken)
+    }
+
+    // Update token info.
+    const {accessToken, refreshToken} = this._signTokenPair(email, deviceID)
+    userToSignIn.accessToken = accessToken;
+    userToSignIn.refreshToken = refreshToken;
+    await userToSignIn.save();
+
+    return userToSignIn as Pick<Manager, "accessToken" | "refreshToken" | "isSubmitted" | "isApproved">;
   }
 
   /**
@@ -38,13 +55,19 @@ export default class AuthService {
         deviceID
       );
 
-      return this.signTokenPair(decodedUserInfo.email, deviceID);
+      return this._signTokenPair(decodedUserInfo.email, deviceID);
     } catch (error) {
       throw error;
     }
   }
 
-  private signTokenPair(email: string, deviceID: string) {
+  private _revokeTokenpair(accessToken: string, refreshToken: string) {
+    // TODO: If tokens are still valid, revoke the both of tokens by inserting in Redis.
+    accessToken;
+    refreshToken;
+  }
+
+  private _signTokenPair(email: string, deviceID: string) {
     const accessTokenPayload = new AccessTokenPayload(email);
     const accessToken = JWT.signAccess(accessTokenPayload);
 

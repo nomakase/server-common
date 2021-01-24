@@ -1,8 +1,7 @@
 import express from "express";
 import AuthService from "../services/AuthService";
-//import GoogleOAuth from "../auth/OAuth/GoogleOAuth";
 import OAuth from "../auth/OAuth";
-import { TypedResponse } from "@custom-types/express";
+import { SignInResponse } from "@custom-types/express";
 
 const router = express.Router();
 
@@ -10,7 +9,7 @@ router.post(
   "/signIn/:authServer",
   async (
     req,
-    res: TypedResponse<{ accessToken: string; refreshToken: string }>,
+    res: SignInResponse,
     next
   ) => {
     const authServer = OAuth[req.params.authServer?.toLowerCase()]
@@ -24,15 +23,17 @@ router.post(
       }
 
       const auth = new AuthService(authServer);
-      const { accessToken, refreshToken } = await auth.signIn(
+      const authResult = await auth.signIn(
         oauthToken,
         deviceID
       );
 
       console.log("signIn: success.");
       res.json({
-        accessToken: accessToken,
-        refreshToken: refreshToken,
+        accessToken: authResult.accessToken,
+        refreshToken: authResult.refreshToken,
+        isSubmitted: authResult.isSubmitted,
+        isApproved: authResult.isApproved,
       });
     } catch (err) {
       err.code = 401;
