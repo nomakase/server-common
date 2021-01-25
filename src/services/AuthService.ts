@@ -23,7 +23,7 @@ export default class AuthService {
       throw error;
     }
 
-    let userToSignIn = await Manager.findOne({ where: { email: email } });
+    let userToSignIn = await Manager.findOneByEmail(email);
     if (!userToSignIn) {
       const error = new Error("Not registered user.");
       error.name = "NoMatchedUserError";
@@ -48,6 +48,12 @@ export default class AuthService {
    * This function enables the user to auto-signin with refresh token saved in the device.
    **/
   signInAuto(refreshToken: string, accessToken: string, deviceID: string) {
+
+    //--
+    // TODO: Search refresh token in Redis.
+    // If exists, token is not valid.
+    // --
+
     try {
       const decodedUserInfo: any = JWT.verifyRefresh(
         refreshToken,

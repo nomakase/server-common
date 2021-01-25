@@ -19,4 +19,8 @@ export class Manager extends BaseEntity {
   
   @Column({ default: false })
   isApproved: boolean;
+
+  static findOneByEmail(email: string) {
+    return this.findOne({ where: { email: email } });
+  }
 }
