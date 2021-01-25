@@ -2,6 +2,7 @@ import hash from "../utils/hash";
 import OAuth from "../auth/OAuth/interface/OAuth";
 import { Manager } from "../entities/Manager";
 import JWT, { AccessTokenPayload, RefreshTokenPayload } from "../auth/JWT";
+import { SignInBody } from "@custom-types/express";
 
 export default class AuthService {
   constructor(private oauth?: OAuth) {}
@@ -65,10 +66,7 @@ export default class AuthService {
     userToSignIn.refreshToken = refreshToken;
     await userToSignIn.save();
 
-    return userToSignIn as Pick<
-      Manager,
-      "accessToken" | "refreshToken" | "isSubmitted" | "isApproved"
-    >;
+    return userToSignIn as SignInBody;
   }
 
   private _revokeTokenpair(accessToken: string, refreshToken: string) {

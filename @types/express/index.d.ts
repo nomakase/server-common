@@ -10,12 +10,13 @@ export type TypedResponse<T> = Overwrite<
   }
 >;
 
-export type SignInResponse = TypedResponse<{
+export type SignInBody = {
   accessToken: string;
   refreshToken: string;
   isSubmitted: boolean;
   isApproved: boolean;
-}>;
+};
+export type SignInResponse = TypedResponse<SignInBody>;
 
 export type ErrorBody = { type: string; status: number; message: string };
 export type ErrorResponse = TypedResponse<ErrorBody>;

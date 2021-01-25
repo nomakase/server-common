@@ -23,18 +23,13 @@ router.post(
       }
 
       const auth = new AuthService(authServer);
-      const authResult = await auth.signIn(
+      const signedInUser = await auth.signIn(
         oauthToken,
         deviceID
       );
 
       console.log("signIn: success.");
-      res.json({
-        accessToken: authResult.accessToken,
-        refreshToken: authResult.refreshToken,
-        isSubmitted: authResult.isSubmitted,
-        isApproved: authResult.isApproved,
-      });
+      res.json(signedInUser);
     } catch (err) {
       err.code = 401;
       console.error(err);
