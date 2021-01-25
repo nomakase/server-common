@@ -11,7 +11,7 @@ export class Manager extends BaseEntity {
   @Column({ nullable: true, default: null })
   accessToken: string;
   
-  @Column({ nullable: true, default: null })
+  @Column({ length: 500, nullable: true, default: null })
   refreshToken: string;
   
   @Column({ default: false })
