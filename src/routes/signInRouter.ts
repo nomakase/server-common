@@ -44,30 +44,27 @@ router.post(
   }
 );
 
-router.post("/signInAuto", (req, res, next) => {
-  const _accessToken = req.body.accessToken;
-  const _refreshToken = req.body.refreshToken;
+router.post("/signInAuto", async (req, res: SignInResponse, next) => {
+  const accessToken = req.body.accessToken;
+  const refreshToken = req.body.refreshToken;
   const deviceID = req.body.deviceID;
 
   // No need OAuth service.
   const auth = new AuthService();
 
   try {
-    if (!(_accessToken && _refreshToken && deviceID)) {
+    if (!(accessToken && refreshToken && deviceID)) {
       throw new Error("Missing parameters for signing in. (/signInAuto)");
     }
 
-    const { accessToken, refreshToken } = auth.signInAuto(
-      _refreshToken,
-      _accessToken,
+    const signedInUser = await auth.signInAuto(
+      refreshToken,
+      accessToken,
       deviceID
     );
 
     console.log("signInAuto: success.");
-    res.json({
-      accessToken: accessToken,
-      refreshToken: refreshToken,
-    });
+    res.json(signedInUser);
   } catch (err) {
     err.code = 401;
     console.error(err);

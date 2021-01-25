@@ -14,7 +14,7 @@ export default class AuthService {
       throw error;
     }
 
-    // In case user disallows to access email info. 
+    // In case user disallows to access email info.
     const email = this.oauth?.getUserInfo();
     if (!email) {
       const error = new Error("Email required.");
@@ -23,6 +23,28 @@ export default class AuthService {
       throw error;
     }
 
+    // Return updated user info.
+    return this._updateTokenInfo(email, deviceID);
+  }
+
+  /**
+   * This function enables the user to auto-signin with refresh token saved in the device.
+   **/
+  async signInAuto(_refreshToken: string,_accessToken: string,deviceID: string) {
+
+    // TODO: Search refresh token in Redis. If exists, token is not valid.
+
+    const decodedUserInfo: any = JWT.verifyRefresh(
+      _refreshToken,
+      _accessToken,
+      deviceID
+    );
+
+    // Return updated user info.
+    return this._updateTokenInfo(decodedUserInfo.email, deviceID);
+  }
+
+  private async _updateTokenInfo(email: string, deviceID: string) {
     let userToSignIn = await Manager.findOneByEmail(email);
     if (!userToSignIn) {
       const error = new Error("Not registered user.");
@@ -32,39 +54,21 @@ export default class AuthService {
     }
 
     if (userToSignIn.accessToken || userToSignIn.refreshToken) {
-      this._revokeTokenpair(userToSignIn.accessToken, userToSignIn.refreshToken)
+      this._revokeTokenpair(
+        userToSignIn.accessToken,
+        userToSignIn.refreshToken
+      );
     }
 
-    // Update token info.
-    const {accessToken, refreshToken} = this._signTokenPair(email, deviceID)
+    const { accessToken, refreshToken } = this._signTokenPair(email, deviceID);
     userToSignIn.accessToken = accessToken;
     userToSignIn.refreshToken = refreshToken;
     await userToSignIn.save();
 
-    return userToSignIn as Pick<Manager, "accessToken" | "refreshToken" | "isSubmitted" | "isApproved">;
-  }
-
-  /**
-   * This function enables the user to auto-signin with refresh token saved in the device.
-   **/
-  signInAuto(refreshToken: string, accessToken: string, deviceID: string) {
-
-    //--
-    // TODO: Search refresh token in Redis.
-    // If exists, token is not valid.
-    // --
-
-    try {
-      const decodedUserInfo: any = JWT.verifyRefresh(
-        refreshToken,
-        accessToken,
-        deviceID
-      );
-
-      return this._signTokenPair(decodedUserInfo.email, deviceID);
-    } catch (error) {
-      throw error;
-    }
+    return userToSignIn as Pick<
+      Manager,
+      "accessToken" | "refreshToken" | "isSubmitted" | "isApproved"
+    >;
   }
 
   private _revokeTokenpair(accessToken: string, refreshToken: string) {
