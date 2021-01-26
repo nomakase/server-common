@@ -1,5 +1,6 @@
 import express from "express";
-import { ErrorResponse, CustomError } from "@custom-types/express";
+import { ErrorResponse } from "@custom-types/express";
+import { CustomError } from "src/utils/CustomError";
 
 export default function addErrorHandlers(app: express.Application) {
   /* 404 ERROR */
@@ -8,21 +9,22 @@ export default function addErrorHandlers(app: express.Application) {
       type: "NotFoundError",
       status: 404,
       message: "The requested URL was not found.",
+      errorCode: 4040
     });
   });
 
   app.use(
     (
-      err: CustomError,
+      { httpStatus, type, name, message, errorCode }: CustomError,
       req: express.Request,
       res: ErrorResponse,
-      _n: express.NextFunction
     ) => {
-      console.log(err.code + " " + req.originalUrl);
-      res.status(err.code).json({
-        type: err.type ?? err.name ?? "Internal Server Error",
-        status: err.code ?? 500,
-        message: err.message ?? "The server has been deserted for a while.",
+      console.log(httpStatus + " " + req.originalUrl);
+      res.status(httpStatus).json({
+        type: type ?? name ?? "Internal Server Error",
+        status: httpStatus ?? 500,
+        message: message ?? "The server has been deserted for a while.",
+        errorCode: errorCode
       });
     }
   );
