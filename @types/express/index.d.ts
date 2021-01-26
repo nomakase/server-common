@@ -18,9 +18,9 @@ export type SignInBody = {
 };
 export type SignInResponse = TypedResponse<SignInBody>;
 
-export type ErrorBody = { type: string; status: number; message: string };
+export type ErrorBody = { type: string; status: number; message: string; errorCode: number; };
 export type ErrorResponse = TypedResponse<ErrorBody>;
-export type CustomError = Overwrite<Error, { name?: string }> & {
-  type: string;
-  code: number;
-};
+// export type CustomError = Overwrite<Error, { name?: string }> & {
+//   type: string;
+//   code: number;
+// };
