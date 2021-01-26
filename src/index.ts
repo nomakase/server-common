@@ -4,23 +4,37 @@ import normalizePort from "./utils/normalizePort";
 import app from "./app";
 import { createConnection } from "typeorm";
 import ormconfig from "./config/ormconfig";
+import connectRedis from "./config/redisConfig";
 
 async function main() {
   const port = normalizePort(process.env.PORT);
 
-  // TODO: Need to change ormconfig.ts for connect nomakase DB
   try {
     await createConnection(ormconfig);
+    console.log("MYSQL connected.");
   } catch (err) {
     console.log(
       `
         ################################################
-                  ⚠️ Fail to connect DB ⚠️
+                  ⚠️ Fail to connect MYSQL ⚠️
         ################################################
     ` + err
     );
   }
-
+  
+  try {
+    await connectRedis();
+    console.log("REDIS connected.");
+  } catch (err) {
+    console.log(
+      `
+        ################################################
+                  ⚠️ Fail to connect REDIS ⚠️
+        ################################################
+    ` + err
+    );
+  }
+  
   try {
     app.listen(port, () => {
       console.log(`
