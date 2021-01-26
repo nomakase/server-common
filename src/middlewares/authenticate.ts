@@ -9,19 +9,18 @@ export default function authenticate(
 ) {
   try {
     const accessToken = req.headers.authorization?.split(AUTH_SCHEME)[1];
-    if (accessToken) {
-      JWT.verifyAccess(accessToken);
-    } else {
+    if (!accessToken) {
       throw new Error(
         "Missing access token to verify in Authorization header."
       );
     }
+    JWT.verifyAccess(accessToken);
+    next();
+    
   } catch (err) {
     err.code = 401;
     console.error(err);
 
     next(err);
   }
-
-  next();
 }
