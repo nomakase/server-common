@@ -1,5 +1,6 @@
 import JWT from "../auth/JWT";
 import { Request, Response, NextFunction } from "express";
+import { InvalidAccessTokenError, NoTokenError } from "../errors";
 
 const AUTH_SCHEME = "Bearer ";
 export default function authenticate(
@@ -7,20 +8,18 @@ export default function authenticate(
   _res: Response,
   next: NextFunction
 ) {
-  try {
-    const accessToken = req.headers.authorization?.split(AUTH_SCHEME)[1];
-    if (!accessToken) {
-      throw new Error(
-        "Missing access token to verify in Authorization header."
-      );
-    }
-    JWT.verifyAccess(accessToken);
-    next();
-    
-  } catch (err) {
-    err.code = 401;
-    console.error(err);
-
-    next(err);
+  const accessToken = req.headers.authorization?.split(AUTH_SCHEME)[1];
+  if (!accessToken) {
+    next(NoTokenError);
+    return;
   }
+
+  try {
+    JWT.verifyAccess(accessToken);
+  } catch (err) {
+    console.error(err);
+    next(InvalidAccessTokenError);
+    return;
+  }
+  next();
 }
