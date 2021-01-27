@@ -3,25 +3,22 @@ import OAuth from "../auth/OAuth/interface/OAuth";
 import { Manager } from "../entities/Manager";
 import JWT, { AccessTokenPayload, RefreshTokenPayload } from "../auth/JWT";
 import { SignInBody } from "@custom-types/express";
+import { OAuthPermissionError, InvalidOAuthTokenError, InvalidRefreshTokenError, NoMatchedUserError } from "../errors";
+
+// TODO: Need to refactor for reusability.(divide)
 
 export default class AuthService {
   constructor(private oauth?: OAuth) {}
 
   async signIn(tokenOrAccessCode: string, deviceID: string) {
     if (!(await this.oauth?.authenticate(tokenOrAccessCode))) {
-      const error = new Error("Invalid user signature.");
-      error.name = "InvalidUserSigError";
-
-      throw error;
+      throw InvalidOAuthTokenError;
     }
 
     // In case user disallows to access email info.
     const email = this.oauth?.getUserInfo();
     if (!email) {
-      const error = new Error("Email required.");
-      error.name = "NoEmailError";
-
-      throw error;
+      throw OAuthPermissionError;
     }
 
     // Return updated user info.
@@ -35,11 +32,18 @@ export default class AuthService {
 
     // TODO: Search refresh token in Redis. If exists, token is not valid.
 
-    const decodedUserInfo: any = JWT.verifyRefresh(
-      _refreshToken,
-      _accessToken,
-      deviceID
-    );
+    const decodedUserInfo = (()=> {
+      try {      
+        return JWT.verifyRefresh(
+          _refreshToken,
+          _accessToken,
+          deviceID
+        );
+      } catch (err) {
+        console.log(err);
+        throw InvalidRefreshTokenError;
+      }
+    })();
 
     // Return updated user info.
     return this._updateTokenInfo(decodedUserInfo.email, deviceID);
@@ -48,10 +52,7 @@ export default class AuthService {
   private async _updateTokenInfo(email: string, deviceID: string) {
     let userToSignIn = await Manager.findOneByEmail(email);
     if (!userToSignIn) {
-      const error = new Error("Not registered user.");
-      error.name = "NoMatchedUserError";
-
-      throw error;
+      throw NoMatchedUserError;
     }
 
     if (userToSignIn.accessToken || userToSignIn.refreshToken) {
