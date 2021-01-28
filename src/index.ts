@@ -4,7 +4,7 @@ import normalizePort from "./utils/normalizePort";
 import app from "./app";
 import { createConnection } from "typeorm";
 import ormconfig from "./config/ormconfig";
-import connectRedis from "./config/redisConfig";
+import Redis from "./config/Redis";
 
 async function main() {
   const port = normalizePort(process.env.PORT);
@@ -23,7 +23,7 @@ async function main() {
   }
   
   try {
-    await connectRedis();
+    await Redis.createConnection();
     console.log("REDIS connected.");
   } catch (err) {
     console.log(
