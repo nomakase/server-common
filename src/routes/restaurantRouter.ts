@@ -16,7 +16,9 @@ const storage = diskStorage({
     cb(null, destination);
   },
   filename: (_, file, cb) => {
-    cb(null, file.originalname);
+    const destination = path.join(__dirname, "../public/images");
+    const numberOfFiles = fs.readdirSync(destination).length;
+    cb(null, numberOfFiles + path.extname(file.originalname));
   }
 })
 const upload = multer({ storage });
