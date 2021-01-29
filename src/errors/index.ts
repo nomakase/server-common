@@ -1,7 +1,9 @@
-import { CustomError } from "../utils/CustomError";
+import { CustomError } from "./CustomError";
 
 // Common Errors
 export const MissingPrameterError = new CustomError("MissingPrameterError", 400, 4000, "Required params are missing.");
+export const InvalidEmailError = new CustomError("Unexpected Email", 400, 4001, "Please check email address");
+export const InvalidPhoneNumberError = new CustomError("Invalid Phone Number", 400, 4002, "Please check phone number");
 
 // Authentication Errors
 export const NoTokenError = new CustomError("NoTokenError", 401, 4010, "Missing access token to verify in Authorization header.");
@@ -10,3 +12,8 @@ export const InvalidRefreshTokenError = new CustomError("InvalidRefreshTokenErro
 export const InvalidOAuthTokenError = new CustomError("InvalidOAuthTokenError", 401, 4013, "This OAuth token is invalid.");
 export const OAuthPermissionError = new CustomError("OAuthPermissionError", 401, 4014, "This OAuth token does not have access to email info.");
 export const NoMatchedUserError = new CustomError("NoMatchedUserError", 401, 4015, "Not registered user.");
+
+// DB Errors
+export const WrongIdentifierError = new CustomError("WrongIdentifierError", 500, 5000, "Please check identifier");
+export const DuplicatedEmailError = new CustomError("Duplicated Email", 500, 5001, "Inputed email has already taken");
+export const DuplicatedPhoneNumberError = new CustomError("Duplicated Phone Number", 500, 5002, "Inputed phone number has already taken");

@@ -4,6 +4,7 @@ import multer, { diskStorage } from "multer";
 import fs from "fs";
 import path from "path";
 import { RestaurantPhoto } from "../entities/RestaurantPhoto";
+import { DuplicatedPhoneNumberError, InvalidPhoneNumberError, MissingPrameterError, WrongIdentifierError } from "../errors";
 
 const router = express.Router();
 const storage = diskStorage({
@@ -26,20 +27,12 @@ const upload = multer({ storage });
 router.post("/", upload.array("photos", 5), async (req, _res, next) => {
   const { name, phoneNumber, address, openningHour, breakTime, description }: Partial<Restaurant> = req.body;
   if (!(name && phoneNumber && address)) {
-    const error: any = new Error("Name, address, and phone number are required.");
-    error.code = 400;
-    error.type = "Invalid Input";
-
-    return next(error);
+    return next(MissingPrameterError);
   }
 
   const regex = /\d{2,3}-\d{3,4}-\d{4}/;
   if (!regex.exec(phoneNumber)) {
-    const error: any = new Error("Please check phone number");
-    error.code = 400;
-    error.type = "Invalid Phone Number";
-
-    return next(error);
+    return next(InvalidPhoneNumberError);
   }
 
   let restaurantId: number;
@@ -57,10 +50,7 @@ router.post("/", upload.array("photos", 5), async (req, _res, next) => {
     console.error(err);
 
     if (err.errno === 1062) {
-      err.code = 500;
-      err.type = "Duplicated Phone Number"
-      err.message = `${phoneNumber} has already taken`
-      next(err);
+      next(DuplicatedPhoneNumberError);
     }
     return;
   }
@@ -79,7 +69,6 @@ router.post("/", async (req, res, next) => {
     restaurant = await Restaurant.findOne({ id: restaurantId });
     if (!restaurant) throw new Error("Unexpected Error");
   } catch (error) {
-    console.error(error);
     return next(error);
   }
 
@@ -104,20 +93,10 @@ router.post("/", async (req, res, next) => {
 router.put("/", async (req, res, next) => {
   const { id, name, phoneNumber, address, openningHour, breakTime, description }: Partial<Restaurant> = req.body;
 
-  if (!id) {
-    const error: any = new Error("Restaurant id is required");
-    error.code = 400;
-    error.type = "Invalid Input"
-    return next(error);
-  }
+  if (!id) return next(MissingPrameterError);
 
   const restaurantToUpdate = await Restaurant.findOne({ id });
-  if (!restaurantToUpdate) {
-    const error: any = new Error("Restaurant doesn't exist");
-    error.code = 500;
-    error.type = "Wrong ID"
-    return next(error);
-  }
+  if (!restaurantToUpdate) return next(WrongIdentifierError);
 
   try {
     await Restaurant.update(id, {
@@ -138,10 +117,7 @@ router.put("/", async (req, res, next) => {
   } catch (err) {
     console.log(err);
     if (err.errno === 1062) {
-      err.code = 500;
-      err.type = "Duplicated Phone Number"
-      err.message = `${phoneNumber} has already taken`
-      next(err);
+      next(DuplicatedPhoneNumberError);
     }
     return;
   }
