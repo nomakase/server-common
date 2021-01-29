@@ -1,9 +1,9 @@
 import express from "express";
-import authenticate from "./middlewares/authenticate";
-import signInRouter from "./routes/signInRouter";
-import addErrorHandlers from "./routes/errorHandlers";
-import restaurantRouter from "./routes/restaurantRouter";
-import signUpRouter from "./routes/signUpRouter";
+import authenticate from "src/middlewares/authenticate";
+import signInRouter from "src/routes/signInRouter";
+import addErrorHandlers from "src/routes/errorHandlers";
+import restaurantRouter from "src/routes/restaurantRouter";
+import signUpRouter from "src/routes/signUpRouter";
 
 const app = express();
 

@@ -1,5 +1,5 @@
 import express from "express";
-import { Manager } from "../entities/Manager";
+import { Manager } from "src/entities/Manager";
 import { MissingPrameterError, InvalidEmailError, DuplicatedEmailError } from "src/errors";
 
 const router = express.Router();

@@ -1,10 +1,10 @@
 import "reflect-metadata";
-import "./config/config";
-import normalizePort from "./utils/normalizePort";
-import app from "./app";
+import "src/config/config";
+import normalizePort from "src/utils/normalizePort";
+import app from "src/app";
 import { createConnection } from "typeorm";
-import ormconfig from "./config/ormconfig";
-import Redis from "./config/Redis";
+import ormconfig from "src/config/ormconfig";
+import Redis from "src/config/Redis";
 
 async function main() {
   const port = normalizePort(process.env.PORT);

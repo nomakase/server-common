@@ -1,8 +1,8 @@
 import express from "express";
-import AuthService from "../services/AuthService";
-import OAuth from "../auth/OAuth";
+import AuthService from "src/services/AuthService";
+import OAuth from "src/auth/OAuth";
 import { SignInResponse } from "@custom-types/express";
-import { MissingPrameterError } from "../errors";
+import { MissingPrameterError } from "src/errors";
 
 const router = express.Router();
 

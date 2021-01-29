@@ -1,10 +1,10 @@
 import express from "express";
-import { Restaurant } from "../entities/Restaurant";
+import { Restaurant } from "src/entities/Restaurant";
 import multer, { diskStorage } from "multer";
 import fs from "fs";
 import path from "path";
-import { RestaurantPhoto } from "../entities/RestaurantPhoto";
-import { DuplicatedPhoneNumberError, InvalidPhoneNumberError, MissingPrameterError, WrongIdentifierError } from "../errors";
+import { RestaurantPhoto } from "src/entities/RestaurantPhoto";
+import { DuplicatedPhoneNumberError, InvalidPhoneNumberError, MissingPrameterError, WrongIdentifierError } from "src/errors";
 
 const router = express.Router();
 const storage = diskStorage({

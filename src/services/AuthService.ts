@@ -1,9 +1,9 @@
-import hash from "../utils/hash";
-import OAuth from "../auth/OAuth/interface/OAuth";
-import { Manager } from "../entities/Manager";
-import JWT, { AccessTokenPayload, RefreshTokenPayload } from "../auth/JWT";
+import hash from "src/utils/hash";
+import OAuth from "src/auth/OAuth/interface/OAuth";
+import { Manager } from "src/entities/Manager";
+import JWT, { AccessTokenPayload, RefreshTokenPayload } from "src/auth/JWT";
 import { SignInBody } from "@custom-types/express";
-import { OAuthPermissionError, InvalidOAuthTokenError, InvalidRefreshTokenError, NoMatchedUserError } from "../errors";
+import { OAuthPermissionError, InvalidOAuthTokenError, InvalidRefreshTokenError, NoMatchedUserError } from "src/errors";
 
 // TODO: Need to refactor for reusability.(divide)
 

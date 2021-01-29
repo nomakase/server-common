@@ -1,6 +1,6 @@
-import JWT from "../auth/JWT";
+import JWT from "src/auth/JWT";
 import { Request, Response, NextFunction } from "express";
-import { InvalidAccessTokenError, NoTokenError } from "../errors";
+import { InvalidAccessTokenError, NoTokenError } from "src/errors";
 
 const AUTH_SCHEME = "Bearer ";
 export default function authenticate(

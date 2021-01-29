@@ -21,9 +21,10 @@
     "experimentalDecorators": true,
     "resolveJsonModule": true,
     "baseUrl": "./",
+    "rootDir": ".",
     "paths": {
       "*": ["*"],
-      "@custom-types/*": ["@types/*"],
+      "@custom-types/*": ["@types/*"]
     },
     "typeRoots": ["./node_modules/@types", "./@types"]
   },
