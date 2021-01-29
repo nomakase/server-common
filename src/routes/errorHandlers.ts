@@ -18,8 +18,9 @@ export default function addErrorHandlers(app: express.Application) {
       { httpStatus, type, name, message, errorCode }: CustomError,
       req: express.Request,
       res: ErrorResponse,
+      _n: express.NextFunction
     ) => {
-      console.log(httpStatus + " " + req.originalUrl);
+      console.log(`${httpStatus} ${req.originalUrl}\n${type ?? name}: ${message}`);
       res.status(httpStatus).json({
         type: type ?? name ?? "Internal Server Error",
         status: httpStatus ?? 500,

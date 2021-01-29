@@ -49,8 +49,8 @@ export default class JWT {
 
         return new AccessTokenPayload(decodedAccessTokenPayload._email);
       } else {
-        const error = new Error("Invalid client info.");
-        error.name = "InvalidClientError";
+        const error = new Error("Invalid token payload.");
+        error.name = "InvalidTokenPayloadError";
 
         throw error;
       }
