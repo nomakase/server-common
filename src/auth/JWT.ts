@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import hash from "src/utils/hash";
+import hash from "../utils/hash";
 
 export default class JWT {
   private static secretKeyA = process.env.ACCESS_SECRET as jwt.Secret;

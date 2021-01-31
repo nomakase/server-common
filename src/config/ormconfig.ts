@@ -1,8 +1,8 @@
-import { Manager } from "src/entities/Manager";
-import { Photo } from "src/entities/Photo";
-import { Restaurant } from "src/entities/Restaurant";
-import { RestaurantPhoto } from "src/entities/RestaurantPhoto";
-import { Time } from "src/entities/Time";
+import { Manager } from "../entities/Manager";
+import { Photo } from "../entities/Photo";
+import { Restaurant } from "../entities/Restaurant";
+import { RestaurantPhoto } from "../entities/RestaurantPhoto";
+import { Time } from "../entities/Time";
 import { ConnectionOptions } from "typeorm";
 
 // TODO: Should connect nomakase DB

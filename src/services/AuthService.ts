@@ -1,14 +1,14 @@
-import hash from "src/utils/hash";
-import OAuth from "src/auth/OAuth/interface/OAuth";
-import { Manager } from "src/entities/Manager";
-import JWT, { AccessTokenPayload, RefreshTokenPayload } from "src/auth/JWT";
 import { SignInBody } from "@custom-types/express";
-import { OAuthPermissionError, InvalidOAuthTokenError, InvalidRefreshTokenError, NoMatchedUserError } from "src/errors";
+import JWT, { AccessTokenPayload, RefreshTokenPayload } from "../auth/JWT";
+import OAuth from "../auth/OAuth/interface/OAuth";
+import { Manager } from "../entities/Manager";
+import { InvalidOAuthTokenError, OAuthPermissionError, InvalidRefreshTokenError, NoMatchedUserError } from "../errors";
+import hash from "../utils/hash";
 
 // TODO: Need to refactor for reusability.(divide)
 
 export default class AuthService {
-  constructor(private oauth?: OAuth) {}
+  constructor(private oauth?: OAuth) { }
 
   async signIn(tokenOrAccessCode: string, deviceID: string) {
     if (!(await this.oauth?.authenticate(tokenOrAccessCode))) {
@@ -28,12 +28,12 @@ export default class AuthService {
   /**
    * This function enables the user to auto-signin with refresh token saved in the device.
    **/
-  async signInAuto(_refreshToken: string,_accessToken: string,deviceID: string) {
+  async signInAuto(_refreshToken: string, _accessToken: string, deviceID: string) {
 
     // TODO: Search refresh token in Redis. If exists, token is not valid.
 
-    const decodedUserInfo = (()=> {
-      try {      
+    const decodedUserInfo = (() => {
+      try {
         return JWT.verifyRefresh(
           _refreshToken,
           _accessToken,

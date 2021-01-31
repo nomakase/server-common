@@ -1,8 +1,8 @@
 import express from "express";
-import AuthService from "src/services/AuthService";
-import OAuth from "src/auth/OAuth";
 import { SignInResponse } from "@custom-types/express";
-import { MissingPrameterError } from "src/errors";
+import OAuth from "../auth/OAuth";
+import { MissingPrameterError } from "../errors";
+import AuthService from "../services/AuthService";
 
 const router = express.Router();
 
@@ -16,7 +16,7 @@ router.post(
     const authServer = OAuth[req.params.authServer?.toLowerCase()]
     const oauthToken = req.body.OAuthToken;
     const deviceID = req.body.deviceID;
-    
+
     try {
 
       if (!(authServer && deviceID && oauthToken)) {

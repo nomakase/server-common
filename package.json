@@ -2,7 +2,6 @@
   "name": "nomakase",
   "version": "1.0.0",
   "description": "server for the project, \"Nomakase\"",
-  "main": "bin/www",
   "scripts": {
     "build": "tsc --project ./",
     "start": "npm run build && node dist/index.js > /dev/null 2>&1",
