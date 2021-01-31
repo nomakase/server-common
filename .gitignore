@@ -103,5 +103,9 @@ dist
 # TernJS port file
 .tern-port
 
-runMysql.sh
+# Public images
+src/public/images/*
+
+# Script files
+*.sh
 scratch.ts
