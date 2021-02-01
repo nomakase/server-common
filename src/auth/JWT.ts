@@ -37,8 +37,9 @@ export default class JWT {
     deviceID: string
   ) => {
     try {
-      const payload = (jwt.verify(refreshToken, JWT.secretKeyR) as any).payload;
+      const payload = ((jwt.verify(refreshToken, JWT.secretKeyR) as any).payload);
 
+      // TODO: use {jti} to check token pair.
       // Hash {accessToken} and compare with {payload.hashedToken}.
       if (
         payload._deviceID == deviceID &&
@@ -58,6 +59,26 @@ export default class JWT {
       throw error;
     }
   };
+
+  static signTokenPair = (email: string, deviceID: string) => {
+    const accessTokenPayload = new AccessTokenPayload(email);
+    const accessToken = JWT.signAccess(accessTokenPayload);
+
+    // Use hashed access token.
+    const refreshTokenPayload = new RefreshTokenPayload(
+      hash(accessToken),
+      deviceID
+    );
+    const refreshToken = JWT.signRefresh(refreshTokenPayload);
+
+    return { accessToken, refreshToken };
+  }
+
+  static revokeTokenpair = (accessToken: string, refreshToken: string) => {
+    // TODO: If tokens are still valid, revoke the both of tokens by inserting in Redis.
+    accessToken;
+    refreshToken;
+  }
 }
 
 // TODO: change into type

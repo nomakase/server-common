@@ -1,9 +1,8 @@
 import { SignInBody } from "@custom-types/express";
-import JWT, { AccessTokenPayload, RefreshTokenPayload } from "../auth/JWT";
+import JWT from "../auth/JWT";
 import OAuth from "../auth/OAuth/interface/OAuth";
 import { Manager } from "../entities/Manager";
 import { InvalidOAuthTokenError, OAuthPermissionError, InvalidRefreshTokenError, NoMatchedUserError } from "../errors";
-import hash from "../utils/hash";
 
 // TODO: Need to refactor for reusability.(divide)
 
@@ -56,37 +55,17 @@ export default class AuthService {
     }
 
     if (userToSignIn.accessToken || userToSignIn.refreshToken) {
-      this._revokeTokenpair(
+      JWT.revokeTokenpair(
         userToSignIn.accessToken,
         userToSignIn.refreshToken
       );
     }
 
-    const { accessToken, refreshToken } = this._signTokenPair(email, deviceID);
+    const { accessToken, refreshToken } = JWT.signTokenPair(email, deviceID);
     userToSignIn.accessToken = accessToken;
     userToSignIn.refreshToken = refreshToken;
     await userToSignIn.save();
 
     return userToSignIn as SignInBody;
-  }
-
-  private _revokeTokenpair(accessToken: string, refreshToken: string) {
-    // TODO: If tokens are still valid, revoke the both of tokens by inserting in Redis.
-    accessToken;
-    refreshToken;
-  }
-
-  private _signTokenPair(email: string, deviceID: string) {
-    const accessTokenPayload = new AccessTokenPayload(email);
-    const accessToken = JWT.signAccess(accessTokenPayload);
-
-    // Use hashed access token.
-    const refreshTokenPayload = new RefreshTokenPayload(
-      hash(accessToken),
-      deviceID
-    );
-    const refreshToken = JWT.signRefresh(refreshTokenPayload);
-
-    return { accessToken, refreshToken };
   }
 }
