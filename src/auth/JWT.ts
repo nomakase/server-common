@@ -18,8 +18,13 @@ export default class JWT {
   };
 
   /* ACCESS TOKEN */
-  static signAccess = (payload: AccessTokenPayload) =>
-    jwt.sign({ payload }, JWT.secretKeyA, JWT.optionsA);
+  static signAccess = (payload: AccessTokenPayload, jwtID?: string) => {
+    return jwt.sign({ payload }, JWT.secretKeyA, {
+      jwtid: jwtID || JWT._generateJWTID(payload.email),
+      ...JWT.optionsA
+    });
+  }
+
   static verifyAccess = (token: string) => {
     try {
       jwt.verify(token, JWT.secretKeyA);
@@ -31,24 +36,26 @@ export default class JWT {
   /* REFRESH TOKEN */
   static signRefresh = (payload: RefreshTokenPayload) =>
     jwt.sign({ payload }, JWT.secretKeyR, JWT.optionsR);
+
   static verifyRefresh = (
     refreshToken: string,
     accessToken: string,
     deviceID: string
   ) => {
     try {
-      const payload = ((jwt.verify(refreshToken, JWT.secretKeyR) as any).payload);
+      const decodedAccessToken = jwt.decode(accessToken) as any;
+      const accessTokenPayload = decodedAccessToken.payload;
+      const accessTokenID = decodedAccessToken.jti;
 
-      // TODO: use {jti} to check token pair.
-      // Hash {accessToken} and compare with {payload.hashedToken}.
+      const payload = (jwt.verify(refreshToken, JWT.secretKeyR) as any).payload;
+
+      // Check token pair using jti and deviceID.
       if (
         payload._deviceID == deviceID &&
-        payload._hashedToken == hash(accessToken)
+        payload._hashedAccessTokenID == hash(accessTokenID)
       ) {
-        const decodedAccessTokenPayload = (jwt.decode(accessToken) as any)
-          .payload;
-
-        return new AccessTokenPayload(decodedAccessTokenPayload._email);
+        
+        return new AccessTokenPayload(accessTokenPayload._email);
       } else {
         const error = new Error("Invalid token payload.");
         error.name = "InvalidTokenPayloadError";
@@ -62,11 +69,12 @@ export default class JWT {
 
   static signTokenPair = (email: string, deviceID: string) => {
     const accessTokenPayload = new AccessTokenPayload(email);
-    const accessToken = JWT.signAccess(accessTokenPayload);
+    const accessTokenID = JWT._generateJWTID(email)
+    const accessToken = JWT.signAccess(accessTokenPayload, accessTokenID);
 
     // Use hashed access token.
     const refreshTokenPayload = new RefreshTokenPayload(
-      hash(accessToken),
+      hash(accessTokenID),
       deviceID
     );
     const refreshToken = JWT.signRefresh(refreshTokenPayload);
@@ -78,6 +86,10 @@ export default class JWT {
     // TODO: If tokens are still valid, revoke the both of tokens by inserting in Redis.
     accessToken;
     refreshToken;
+  }
+
+  private static _generateJWTID(email: string){
+    return hash(email + Date.now());
   }
 }
 
@@ -95,16 +107,16 @@ class AccessTokenPayload {
 }
 
 class RefreshTokenPayload {
-  private readonly _hashedToken: string;
+  private readonly _hashedAccessTokenID: string;
   private readonly _deviceID: string;
 
-  constructor(hashedToken: string, deviceID: string) {
-    this._hashedToken = hashedToken;
+  constructor(hashedAccessTokenID: string, deviceID: string) {
+    this._hashedAccessTokenID = hashedAccessTokenID;
     this._deviceID = deviceID;
   }
 
-  get hashedToken(): string {
-    return this._hashedToken;
+  get hashedAccessTokenID(): string {
+    return this._hashedAccessTokenID;
   }
 
   get deviceID(): string {
