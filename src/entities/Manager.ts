@@ -8,7 +8,7 @@ export class Manager extends BaseEntity {
   @Column({ unique: true })
   email: string;
   
-  @Column({ nullable: true, default: null })
+  @Column({ length: 400, nullable: true, default: null })
   accessToken: string;
   
   @Column({ length: 500, nullable: true, default: null })
