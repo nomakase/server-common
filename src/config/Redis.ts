@@ -1,9 +1,17 @@
 import redis from "redis";
+import { promisify } from "util";
 
 export default class Redis {
   private static readonly redisConfig = {
     password: process.env.REDIS_PASSWORD,
   };
+
+  private static readonly promisifyCommands: Array<keyof redis.Commands<boolean>> = [
+    "set",
+    "SET",
+    "get",
+    "GET",
+  ];
 
   private static client: redis.RedisClient | undefined;
 
@@ -16,6 +24,7 @@ export default class Redis {
           reject(err);
         });
         Redis.client.on("ready", () => {
+          Redis.promisifyRedis();
           resolve();
         });
       } catch (err) {
@@ -29,5 +38,15 @@ export default class Redis {
       throw new Error("Not connected to Redis.");
     }
     return Redis.client;
+  }
+
+  private static promisifyRedis(){
+    console.log("Promisifying Redis commands...");
+    const client = Redis.getClient();
+    
+    // Overwrite functions(Redis Commands)
+    for (const property of Redis.promisifyCommands) {
+      client[property] = promisify(client[property]).bind(client);
+    }
   }
 }
