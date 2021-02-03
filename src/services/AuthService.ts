@@ -1,4 +1,3 @@
-import { SignInBody } from "@custom-types/express";
 import JWT, { AccessTokenPayload } from "../auth/JWT";
 import OAuth from "../auth/OAuth/interface/OAuth";
 import { Manager } from "../entities/Manager";
@@ -21,9 +20,13 @@ export default class AuthService {
     if (!email) {
       throw OAuthPermissionError;
     }
-
-    // Return updated user info.
-    return this._updateTokenInfo(email, deviceID);
+    
+    const { accessToken, refreshToken } = JWT.signTokenPair(email, deviceID);
+    
+    const updatedUser = await this._updateTokenInfo(email, accessToken, refreshToken);
+    const { isSubmitted, isApproved } = updatedUser;
+    
+    return { accessToken, refreshToken, isSubmitted, isApproved };
   }
 
   /**
@@ -54,12 +57,17 @@ export default class AuthService {
       throw AnotherDeviceDetectedError;
     }
     
-    // Return updated user info.
-    return this._updateTokenInfo(decodedUserInfo.email, deviceID);
+    const { accessToken, refreshToken } = JWT.signTokenPair(decodedUserInfo.email, deviceID);
+    
+    const updatedUser = await this._updateTokenInfo(user, accessToken, refreshToken);
+    const { isSubmitted, isApproved } = updatedUser;
+    
+    return { accessToken, refreshToken, isSubmitted, isApproved };
   }
 
-  private async _updateTokenInfo(email: string, deviceID: string) {
-    let userToSignIn = await Manager.findOneByEmail(email);
+  private async _updateTokenInfo(user: string | Manager, accessToken: string, refreshToken: string) {
+    const userToSignIn = 
+      (typeof user === "string") ? await Manager.findOneByEmail(user) : user;
     if (!userToSignIn) {
       throw NoMatchedUserError;
     }
@@ -71,16 +79,13 @@ export default class AuthService {
       );
     }
 
-    const { accessToken, refreshToken } = JWT.signTokenPair(email, deviceID);
     const accessTokenID = (JWT.decodeAccess(accessToken) as any).jti;
     const refreshTokenID = (JWT.decodeRefresh(refreshToken) as any).jti ;
-    
     userToSignIn.accessTokenID = accessTokenID;
     userToSignIn.refreshTokenID = refreshTokenID;
     
     await userToSignIn.save();
     
-    const {isSubmitted, isApproved} = userToSignIn
-    return {accessToken, refreshToken, isSubmitted , isApproved} as SignInBody;
+    return userToSignIn;
   }
 }
