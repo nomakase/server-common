@@ -29,11 +29,11 @@ export default class JWT {
     try {
       return jwt.verify(token, JWT.secretKeyA);
     } catch (error) {
-      throw error;
+      return null;
     }
   };
   
-  static decodeAccess = (token: string, extractPayload: boolean = false): Object | AccessTokenPayload => {
+  static decodeAccess = (token: string, extractPayload: boolean = false) => {
     try {
       if (extractPayload){
         const payload = (jwt.verify(token, JWT.secretKeyA, {ignoreExpiration: true}) as any).payload;
@@ -42,7 +42,7 @@ export default class JWT {
       
       return jwt.verify(token, JWT.secretKeyA, {ignoreExpiration: true});
     } catch (error) {
-      throw error;
+      return null;
     }
   }
 
@@ -81,7 +81,7 @@ export default class JWT {
         throw error;
       }
     } catch (error) {
-      throw error;
+      throw null;
     }
   };
   
@@ -89,7 +89,7 @@ export default class JWT {
     try {
       return jwt.verify(token, JWT.secretKeyR, {ignoreExpiration: true});
     } catch (error) {
-      throw error;
+      throw null;
     }
   }
 

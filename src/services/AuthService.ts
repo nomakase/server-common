@@ -2,7 +2,9 @@ import { SignInBody } from "@custom-types/express";
 import JWT, { AccessTokenPayload } from "../auth/JWT";
 import OAuth from "../auth/OAuth/interface/OAuth";
 import { Manager } from "../entities/Manager";
-import { InvalidOAuthTokenError, OAuthPermissionError, InvalidRefreshTokenError, NoMatchedUserError, AnotherDeviceDetectedError } from "../errors";
+import { InvalidOAuthTokenError, OAuthPermissionError, 
+  InvalidRefreshTokenError, NoMatchedUserError, 
+  AnotherDeviceDetectedError, InvalidAccessTokenError } from "../errors";
 
 // TODO: Need to refactor for reusability.(divide)
 
@@ -29,31 +31,27 @@ export default class AuthService {
    **/
   async signInAuto(_refreshToken: string, _accessToken: string, deviceID: string) {
 
-    // TODO: Search refresh token in Redis. If exists, token is not valid.
-    // TODO: Need to handle more error.
+    // Check access token can be decoded.
+    const decodedUserInfo = JWT.decodeAccess(_accessToken, true) as AccessTokenPayload;
+    if (!decodedUserInfo) {
+      throw InvalidAccessTokenError;
+    }
     
     // Verify refresh Token. And this should be prior to verifying jti.
-    try {
-      JWT.verifyRefresh(_refreshToken, _accessToken, deviceID);
-    } catch (err) {
+    const decodedRefreshToken = JWT.verifyRefresh(_refreshToken, _accessToken, deviceID);
+    if (!decodedRefreshToken) {
       throw InvalidRefreshTokenError;
     }
     
+    const user = await Manager.findOneByEmail(decodedUserInfo.email);
+    if (!user) {
+      throw NoMatchedUserError;
+    }
+    
     // Verify using jti claim.
-    let decodedUserInfo;
-    try {
-      decodedUserInfo = JWT.decodeAccess(_accessToken, true) as AccessTokenPayload;
-      const user = await Manager.findOneByEmail(decodedUserInfo.email);
-      if (!user) {
-        throw NoMatchedUserError;
-      }
-      
-      const jti = (JWT.decodeRefresh(_refreshToken) as any).jti;
-      if (user.refreshTokenID !== jti) {
-        throw AnotherDeviceDetectedError;
-      }
-    } catch (err) {
-      throw err;
+    const jti = decodedRefreshToken.jti;
+    if (user.refreshTokenID !== jti) {
+      throw AnotherDeviceDetectedError;
     }
     
     // Return updated user info.
@@ -82,8 +80,7 @@ export default class AuthService {
     
     await userToSignIn.save();
     
-    const isSubmitted = userToSignIn.isSubmitted;
-    const isApproved = userToSignIn.isApproved;
+    const {isSubmitted, isApproved} = userToSignIn
     return {accessToken, refreshToken, isSubmitted , isApproved} as SignInBody;
   }
 }

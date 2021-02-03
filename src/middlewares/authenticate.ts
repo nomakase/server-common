@@ -13,13 +13,12 @@ export default function authenticate(
     next(NoTokenError);
     return;
   }
-
-  try {
-    JWT.verifyAccess(accessToken);
-  } catch (err) {
-    console.error(err);
+  
+  const res = JWT.verifyAccess(accessToken);
+  if (!res) {
     next(InvalidAccessTokenError);
     return;
   }
+  
   next();
 }
