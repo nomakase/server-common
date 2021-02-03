@@ -9,10 +9,10 @@ export class Manager extends BaseEntity {
   email: string;
   
   @Column({ length: 400, nullable: true, default: null })
-  accessToken: string;
+  accessTokenID: string;
   
   @Column({ length: 500, nullable: true, default: null })
-  refreshToken: string;
+  refreshTokenID: string;
   
   @Column({ default: false })
   isSubmitted: boolean;
