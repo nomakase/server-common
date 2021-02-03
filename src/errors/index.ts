@@ -12,6 +12,8 @@ export const InvalidRefreshTokenError = new CustomError("InvalidRefreshTokenErro
 export const InvalidOAuthTokenError = new CustomError("InvalidOAuthTokenError", 401, 4013, "This OAuth token is invalid.");
 export const OAuthPermissionError = new CustomError("OAuthPermissionError", 401, 4014, "This OAuth token does not have access to email info.");
 export const NoMatchedUserError = new CustomError("NoMatchedUserError", 401, 4015, "Not registered user.");
+export const AnotherDeviceDetectedError = new CustomError("AnotherDeviceDetectedError", 401, 4016, "This account has been signed in on another device.");
+
 
 // DB Errors
 export const WrongIdentifierError = new CustomError("WrongIdentifierError", 500, 5000, "Please check identifier");

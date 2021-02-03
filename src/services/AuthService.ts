@@ -1,8 +1,8 @@
 import { SignInBody } from "@custom-types/express";
-import JWT from "../auth/JWT";
+import JWT, { AccessTokenPayload } from "../auth/JWT";
 import OAuth from "../auth/OAuth/interface/OAuth";
 import { Manager } from "../entities/Manager";
-import { InvalidOAuthTokenError, OAuthPermissionError, InvalidRefreshTokenError, NoMatchedUserError } from "../errors";
+import { InvalidOAuthTokenError, OAuthPermissionError, InvalidRefreshTokenError, NoMatchedUserError, AnotherDeviceDetectedError } from "../errors";
 
 // TODO: Need to refactor for reusability.(divide)
 
@@ -30,20 +30,32 @@ export default class AuthService {
   async signInAuto(_refreshToken: string, _accessToken: string, deviceID: string) {
 
     // TODO: Search refresh token in Redis. If exists, token is not valid.
-
-    const decodedUserInfo = (() => {
-      try {
-        return JWT.verifyRefresh(
-          _refreshToken,
-          _accessToken,
-          deviceID
-        );
-      } catch (err) {
-        console.log(err);
-        throw InvalidRefreshTokenError;
+    // TODO: Need to handle more error.
+    
+    // Verify refresh Token. And this should be prior to verifying jti.
+    try {
+      JWT.verifyRefresh(_refreshToken, _accessToken, deviceID);
+    } catch (err) {
+      throw InvalidRefreshTokenError;
+    }
+    
+    // Verify using jti claim.
+    let decodedUserInfo;
+    try {
+      decodedUserInfo = JWT.decodeAccess(_accessToken, true) as AccessTokenPayload;
+      const user = await Manager.findOneByEmail(decodedUserInfo.email);
+      if (!user) {
+        throw NoMatchedUserError;
       }
-    })();
-
+      
+      const jti = (JWT.decodeRefresh(_refreshToken) as any).jti;
+      if (user.refreshTokenID !== jti) {
+        throw AnotherDeviceDetectedError;
+      }
+    } catch (err) {
+      throw err;
+    }
+    
     // Return updated user info.
     return this._updateTokenInfo(decodedUserInfo.email, deviceID);
   }
@@ -54,18 +66,24 @@ export default class AuthService {
       throw NoMatchedUserError;
     }
 
-    if (userToSignIn.accessToken || userToSignIn.refreshToken) {
+    if (userToSignIn.accessTokenID || userToSignIn.refreshTokenID) {
       JWT.revokeTokenpair(
-        userToSignIn.accessToken,
-        userToSignIn.refreshToken
+        userToSignIn.accessTokenID,
+        userToSignIn.refreshTokenID
       );
     }
 
     const { accessToken, refreshToken } = JWT.signTokenPair(email, deviceID);
-    userToSignIn.accessToken = accessToken;
-    userToSignIn.refreshToken = refreshToken;
+    const accessTokenID = (JWT.decodeAccess(accessToken) as any).jti;
+    const refreshTokenID = (JWT.decodeRefresh(refreshToken) as any).jti ;
+    
+    userToSignIn.accessTokenID = accessTokenID;
+    userToSignIn.refreshTokenID = refreshTokenID;
+    
     await userToSignIn.save();
-
-    return userToSignIn as SignInBody;
+    
+    const isSubmitted = userToSignIn.isSubmitted;
+    const isApproved = userToSignIn.isApproved;
+    return {accessToken, refreshToken, isSubmitted , isApproved} as SignInBody;
   }
 }
