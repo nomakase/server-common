@@ -27,11 +27,24 @@ export default class JWT {
 
   static verifyAccess = (token: string) => {
     try {
-      jwt.verify(token, JWT.secretKeyA);
+      return jwt.verify(token, JWT.secretKeyA);
     } catch (error) {
       throw error;
     }
   };
+  
+  static decodeAccess = (token: string, extractPayload: boolean = false): Object | AccessTokenPayload => {
+    try {
+      if (extractPayload){
+        const payload = (jwt.verify(token, JWT.secretKeyA, {ignoreExpiration: true}) as any).payload;
+        return new AccessTokenPayload(payload._email);
+      }
+      
+      return jwt.verify(token, JWT.secretKeyA, {ignoreExpiration: true});
+    } catch (error) {
+      throw error;
+    }
+  }
 
   /* REFRESH TOKEN */
   static signRefresh = (payload: RefreshTokenPayload) =>
@@ -43,19 +56,19 @@ export default class JWT {
     deviceID: string
   ) => {
     try {
-      const decodedAccessToken = jwt.decode(accessToken) as any;
-      const accessTokenPayload = decodedAccessToken.payload;
+      const decodedAccessToken = JWT.decodeAccess(accessToken) as any;
       const accessTokenID = decodedAccessToken.jti;
 
-      const payload = (jwt.verify(refreshToken, JWT.secretKeyR) as any).payload;
+      const decodedRefreshToken = jwt.verify(refreshToken, JWT.secretKeyR) as any;
+      const refreshTokenPayload = decodedRefreshToken.payload;
 
       // Check token pair using jti and deviceID.
       if (
-        payload._deviceID == deviceID &&
-        payload._hashedAccessTokenID == hash(accessTokenID)
+        refreshTokenPayload._deviceID == deviceID &&
+        refreshTokenPayload._hashedAccessTokenID == hash(accessTokenID)
       ) {
         
-        return new AccessTokenPayload(accessTokenPayload._email);
+        return decodedRefreshToken;
       } else {
         const error = new Error("Invalid token payload.");
         error.name = "InvalidTokenPayloadError";
@@ -66,6 +79,14 @@ export default class JWT {
       throw error;
     }
   };
+  
+  static decodeRefresh = (token: string) => {
+    try {
+      return jwt.verify(token, JWT.secretKeyR, {ignoreExpiration: true});
+    } catch (error) {
+      throw error;
+    }
+  }
 
   static signTokenPair = (email: string, deviceID: string) => {
     const accessTokenPayload = new AccessTokenPayload(email);
