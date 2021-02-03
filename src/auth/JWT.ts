@@ -47,9 +47,14 @@ export default class JWT {
   }
 
   /* REFRESH TOKEN */
-  static signRefresh = (payload: RefreshTokenPayload) =>
-    jwt.sign({ payload }, JWT.secretKeyR, JWT.optionsR);
-
+  static signRefresh = (payload: RefreshTokenPayload, jwtID?: string) => {
+    return jwt.sign({ payload }, JWT.secretKeyR, {
+      // Not important which values to be used for generating jti, just have to keep it unique.
+      jwtid: jwtID || JWT._generateJWTID(payload.deviceID),
+      ...JWT.optionsR
+    });
+  }
+    
   static verifyRefresh = (
     refreshToken: string,
     accessToken: string,
