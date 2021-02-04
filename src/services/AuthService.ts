@@ -52,10 +52,7 @@ export default class AuthService {
       throw InvalidRefreshTokenError;
     }
     
-    const userToSignIn = await Manager.findOneByEmail(decodedUserInfo.email);
-    if (!userToSignIn) {
-      throw NoMatchedUserError;
-    }
+    const userToSignIn = await this._getUser(decodedUserInfo.email)
     
     // Verify using jti claim.
     const jti = decodedRefreshToken.jti;
@@ -99,7 +96,6 @@ export default class AuthService {
   }
   
   private async _revokeAccessToken(accessTokenID: string, tokenRemaining: number = BlackList.MAX_REMAINING) {
-    console.log("Access token remaining time is " +  tokenRemaining);
     if (tokenRemaining > 0) {
       await BlackList.addAccessToken(accessTokenID, tokenRemaining);
     }
