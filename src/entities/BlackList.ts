@@ -1,6 +1,8 @@
 import Redis from "../config/Redis";
 
 export class BlackList {
+    
+    public static readonly MAX_REMAINING = 86400; //sec
 
     private static readonly ACCESS_TOKEN_PREFIX = "ACCESS:";
     //private static readonly REFRESH_TOKEN_PREFIX = "REFRESH:";
