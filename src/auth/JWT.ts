@@ -45,6 +45,13 @@ export default class JWT {
       return null;
     }
   }
+  
+  static getAccessTokenRemainingTime(token: string) {
+    const decodedAccessToken = JWT.decodeAccess(token) as any;
+    const remaining = decodedAccessToken.exp - Math.floor(Date.now()/1000);
+    
+    return remaining > 0 ? remaining : 0;
+  }
 
   /* REFRESH TOKEN */
   static signRefresh = (payload: RefreshTokenPayload, jwtID?: string) => {
@@ -92,6 +99,13 @@ export default class JWT {
       throw null;
     }
   }
+  
+  static getRefreshTokenRemainingTime(token: string) {
+    const decodedRefreshToken = JWT.decodeRefresh(token) as any;
+    const remaining = decodedRefreshToken.exp - Math.floor(Date.now()/1000);
+    
+    return remaining > 0 ? remaining : 0;
+  }
 
   static signTokenPair = (email: string, deviceID: string) => {
     const accessTokenPayload = new AccessTokenPayload(email);
@@ -106,12 +120,6 @@ export default class JWT {
     const refreshToken = JWT.signRefresh(refreshTokenPayload);
 
     return { accessToken, refreshToken };
-  }
-
-  static revokeTokenpair = (accessToken: string, refreshToken: string) => {
-    // TODO: If tokens are still valid, revoke the both of tokens by inserting in Redis.
-    accessToken;
-    refreshToken;
   }
 
   private static _generateJWTID(email: string){
