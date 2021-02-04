@@ -24,7 +24,7 @@ export default class AuthService {
     
     const userToSignIn = await this._getUser(email);
     if (userToSignIn.accessTokenID) {
-      await this._revokeAccessToken(userToSignIn.accessTokenID);
+      await this._revokeAccessToken(userToSignIn.accessTokenID, BlackList.REASON_NEW_SIGNIN);
     }
     
     const { accessToken, refreshToken } = JWT.signTokenPair(email, deviceID);
@@ -62,7 +62,7 @@ export default class AuthService {
     
     if (userToSignIn.accessTokenID) {
       const remaining = JWT.getAccessTokenRemainingTime(_accessToken);
-      await this._revokeAccessToken(userToSignIn.accessTokenID, remaining);
+      await this._revokeAccessToken(userToSignIn.accessTokenID, BlackList.REASON_REFRESH, remaining);
     }
     
     const { accessToken, refreshToken } = JWT.signTokenPair(decodedUserInfo.email, deviceID);
@@ -95,9 +95,9 @@ export default class AuthService {
     return user;
   }
   
-  private async _revokeAccessToken(accessTokenID: string, tokenRemaining: number = BlackList.MAX_REMAINING) {
+  private async _revokeAccessToken(accessTokenID: string, reason: string, tokenRemaining: number = BlackList.MAX_REMAINING) {
     if (tokenRemaining > 0) {
-      await BlackList.addAccessToken(accessTokenID, tokenRemaining);
+      await BlackList.addAccessToken(accessTokenID, reason, tokenRemaining);
     }
   }
 }
