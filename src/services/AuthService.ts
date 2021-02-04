@@ -4,6 +4,7 @@ import { Manager } from "../entities/Manager";
 import { InvalidOAuthTokenError, OAuthPermissionError, 
   InvalidRefreshTokenError, NoMatchedUserError, 
   AnotherDeviceDetectedError, InvalidAccessTokenError } from "../errors";
+import { BlackList } from "../entities/BlackList";
 
 // TODO: Need to refactor for reusability.(divide)
 
@@ -21,9 +22,14 @@ export default class AuthService {
       throw OAuthPermissionError;
     }
     
+    const userToSignIn = await this._getUser(email);
+    if (userToSignIn.accessTokenID) {
+      await this._revokeAccessToken(userToSignIn.accessTokenID);
+    }
+    
     const { accessToken, refreshToken } = JWT.signTokenPair(email, deviceID);
     
-    const updatedUser = await this._updateTokenInfo(email, accessToken, refreshToken);
+    const updatedUser = await this._updateTokenInfo(userToSignIn, accessToken, refreshToken);
     const { isSubmitted, isApproved } = updatedUser;
     
     return { accessToken, refreshToken, isSubmitted, isApproved };
@@ -46,20 +52,25 @@ export default class AuthService {
       throw InvalidRefreshTokenError;
     }
     
-    const user = await Manager.findOneByEmail(decodedUserInfo.email);
-    if (!user) {
+    const userToSignIn = await Manager.findOneByEmail(decodedUserInfo.email);
+    if (!userToSignIn) {
       throw NoMatchedUserError;
     }
     
     // Verify using jti claim.
     const jti = decodedRefreshToken.jti;
-    if (user.refreshTokenID !== jti) {
+    if (userToSignIn.refreshTokenID !== jti) {
       throw AnotherDeviceDetectedError;
+    }
+    
+    if (userToSignIn.accessTokenID) {
+      const remaining = JWT.getAccessTokenRemainingTime(_accessToken);
+      await this._revokeAccessToken(userToSignIn.accessTokenID, remaining);
     }
     
     const { accessToken, refreshToken } = JWT.signTokenPair(decodedUserInfo.email, deviceID);
     
-    const updatedUser = await this._updateTokenInfo(user, accessToken, refreshToken);
+    const updatedUser = await this._updateTokenInfo(userToSignIn, accessToken, refreshToken);
     const { isSubmitted, isApproved } = updatedUser;
     
     return { accessToken, refreshToken, isSubmitted, isApproved };
@@ -67,18 +78,8 @@ export default class AuthService {
 
   private async _updateTokenInfo(user: string | Manager, accessToken: string, refreshToken: string) {
     const userToSignIn = 
-      (typeof user === "string") ? await Manager.findOneByEmail(user) : user;
-    if (!userToSignIn) {
-      throw NoMatchedUserError;
-    }
-
-    if (userToSignIn.accessTokenID || userToSignIn.refreshTokenID) {
-      JWT.revokeTokenpair(
-        userToSignIn.accessTokenID,
-        userToSignIn.refreshTokenID
-      );
-    }
-
+      (typeof user === "string") ? await this._getUser(user) : user;
+    
     const accessTokenID = (JWT.decodeAccess(accessToken) as any).jti;
     const refreshTokenID = (JWT.decodeRefresh(refreshToken) as any).jti ;
     userToSignIn.accessTokenID = accessTokenID;
@@ -87,5 +88,20 @@ export default class AuthService {
     await userToSignIn.save();
     
     return userToSignIn;
+  }
+  
+  private async _getUser(email: string) {
+    const user = await Manager.findOneByEmail(email);
+    if (!user) {
+      throw NoMatchedUserError;
+    }
+    return user;
+  }
+  
+  private async _revokeAccessToken(accessTokenID: string, tokenRemaining: number = BlackList.MAX_REMAINING) {
+    console.log("Access token remaining time is " +  tokenRemaining);
+    if (tokenRemaining > 0) {
+      await BlackList.addAccessToken(accessTokenID, tokenRemaining);
+    }
   }
 }
