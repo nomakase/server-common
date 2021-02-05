@@ -11,6 +11,8 @@ export default class Redis {
     "SET",
     "get",
     "GET",
+    "expire",
+    "EXPIRE",
   ];
 
   private static client: redis.RedisClient | undefined;
