@@ -17,16 +17,15 @@ export default class GoogleOAuth implements OAuth {
     });
 
     const userInfo = ticket.getPayload();
-    const email = userInfo?.email;
-    if (email) {
+    if (userInfo){
       this.userInfo = userInfo;
       return true;
     }
-
+    
     return false;
   }
 
   getUserInfo() {
-    return this.userInfo ? this.userInfo.email + "" : "";
+    return this.userInfo?.email ? this.userInfo.email : null;
   }
 }
