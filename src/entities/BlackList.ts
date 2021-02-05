@@ -37,7 +37,7 @@ export class BlackList {
         }
     }
     
-    static findAccessToken = async (jti: string) => {
+    static findAccessToken = async (jti: string): Promise<any> => {
         try {
             return await Promise.resolve().then(
                 () => Redis.getClient().get(BlackList.ACCESS_TOKEN_PREFIX + jti));
