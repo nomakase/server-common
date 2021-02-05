@@ -1,14 +1,28 @@
 import express from "express";
+import OAuth from "../auth/OAuth";
+import { DuplicatedEmailError, InvalidOAuthTokenError, MissingPrameterError, OAuthPermissionError } from "../errors";
 import { Manager } from "../entities/Manager";
-import { MissingPrameterError, InvalidEmailError, DuplicatedEmailError } from "../errors";
 
 const router = express.Router();
 
-router.post("/", async (req, res, next) => {
-  const { email }: Partial<Manager> = req.body;
+router.post("/:authServer", async (req, res, next) => {
+  const authServer = OAuth[req.params.authServer?.toLowerCase()];
+  const oauthToken = req.body.OAuthToken;
 
-  if (!email) return next(MissingPrameterError);
-  if (!email.includes("@")) return next(InvalidEmailError);
+  if (!oauthToken) return next(MissingPrameterError);
+
+  let isAuthenticated;
+  try {
+    isAuthenticated = await authServer.authenticate(oauthToken);
+  } catch (error) {
+    console.error(error);
+    return next(error);
+  }
+
+  if (!isAuthenticated) return next(InvalidOAuthTokenError);
+
+  const email = authServer.getUserInfo();
+  if (!email) return next(OAuthPermissionError);
 
   let managerId: number;
   try {
