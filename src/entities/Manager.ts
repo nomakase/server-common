@@ -8,10 +8,10 @@ export class Manager extends BaseEntity {
   @Column({ unique: true })
   email: string;
   
-  @Column({ nullable: true, default: null })
+  @Column({ nullable: true })
   accessTokenID: string;
   
-  @Column({ nullable: true, default: null })
+  @Column({ nullable: true })
   refreshTokenID: string;
   
   @Column({ default: false })
@@ -21,6 +21,6 @@ export class Manager extends BaseEntity {
   isApproved: boolean;
 
   static findOneByEmail(email: string) {
-    return this.findOne({ where: { email: email } });
+    return this.findOne({ email });
   }
 }
