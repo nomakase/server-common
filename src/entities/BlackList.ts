@@ -10,7 +10,7 @@ export class BlackList {
     //private static readonly REFRESH_TOKEN_PREFIX = "REFRESH:";
     
     private static readonly SET_SUCCESS = "OK";
-    private static readonly EXPIRE_SUCCESS = true;
+    private static readonly EXPIRE_SUCCESS = 1;
     
     
     static addAccessToken = async (jti: string, reason: string, expiresIn: number) => {
@@ -26,7 +26,7 @@ export class BlackList {
             
             res = await Promise.resolve()
                 .then(() => Redis.getClient().EXPIRE(key, expiresIn));
-            
+                
             if (res !== BlackList.EXPIRE_SUCCESS) {
                 throw new Error("Fail to set expiration time.");
             }
