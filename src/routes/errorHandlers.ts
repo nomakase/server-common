@@ -20,9 +20,9 @@ export default function addErrorHandlers(app: express.Application) {
       res: ErrorResponse,
       _n: express.NextFunction
     ) => {
-      console.log(`${httpStatus} ${req.originalUrl}\n${type ?? name}: ${message}`);
-      res.status(httpStatus).json({
-        type: type ?? name ?? "Internal Server Error",
+      console.log(`${httpStatus||500} ${req.originalUrl}\n${name ?? type}: ${message}`);
+      res.status(httpStatus || 500).json({
+        type: name ?? "Internal Server Error",
         status: httpStatus ?? 500,
         message: message ?? "The server has been deserted for a while.",
         errorCode: errorCode
