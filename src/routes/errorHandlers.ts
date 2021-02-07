@@ -5,6 +5,7 @@ import { CustomError } from "../errors/CustomError";
 export default function addErrorHandlers(app: express.Application) {
   /* 404 ERROR */
   app.use((_req, res: ErrorResponse) => {
+    console.log(`${404} ${_req.originalUrl}\nNotFoundError: The requested URL was not found.`);
     res.status(404).json({
       type: "NotFoundError",
       status: 404,
