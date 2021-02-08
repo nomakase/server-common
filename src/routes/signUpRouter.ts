@@ -6,7 +6,7 @@ import { Manager } from "../entities/Manager";
 const router = express.Router();
 
 router.post("/:authServer", async (req, res, next) => {
-  const authServer = OAuth[req.params.authServer?.toLowerCase()];
+  const authServer = OAuth[req.params.authServer?.toLowerCase()]?.create();
   const oauthToken = req.body.OAuthToken;
 
   if (!oauthToken) return next(MissingPrameterError);

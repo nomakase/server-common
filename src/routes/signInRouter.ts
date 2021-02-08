@@ -13,23 +13,26 @@ router.post(
     res: SignInResponse,
     next
   ) => {
-    const authServer = OAuth[req.params.authServer?.toLowerCase()]
+    const authServer = OAuth[req.params.authServer?.toLowerCase()];
     const oauthToken = req.body.OAuthToken;
     const deviceID = req.body.deviceID;
 
     try {
-
       if (!(authServer && deviceID && oauthToken)) {
         throw MissingPrameterError;
       }
 
-      const auth = new AuthService(authServer);
+      const auth = new AuthService(authServer.create());
       const signedInUser = await auth.signIn(
         oauthToken,
         deviceID
       );
 
       console.log("signIn: success.");
+      console.log("acces : " + signedInUser.accessToken);
+      console.log("refre : " + signedInUser.refreshToken);
+      console.log("devID : " + deviceID);
+      
       res.json(signedInUser);
     } catch (err) {
       console.error(err);
