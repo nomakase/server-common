@@ -3,13 +3,12 @@ import JWT from "../auth/JWT";
 import { NoTokenError, InvalidAccessTokenError, AnotherDeviceDetectedError } from "../errors";
 import { BlackList } from "../entities/BlackList";
 
-const AUTH_SCHEME = "Bearer ";
 export default async function authenticate(
   req: Request,
   _res: Response,
   next: NextFunction
 ) {
-  const accessToken = req.headers.authorization?.split(AUTH_SCHEME)[1];
+  const accessToken = req.headers.authorization
   if (!accessToken) {
     next(NoTokenError);
     return;

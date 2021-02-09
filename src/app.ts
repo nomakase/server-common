@@ -1,4 +1,5 @@
 import express from "express";
+import tokenParser from"./middlewares/tokenParser";
 import authenticate from "./middlewares/authenticate";
 import addErrorHandlers from "./routes/errorHandlers";
 import restaurantRouter from "./routes/restaurantRouter";
@@ -17,12 +18,12 @@ app.use("/", (req, _res, next) => {
 });
 
 // Need to authenticate except for the url starting with "sign".
+app.use(tokenParser);
 app.use(/\/((?!sign).)*/, authenticate);
 
 app.use("/signIn", signInRouter);
 app.use("/signUp", signUpRouter);
 app.use("/restaurant", restaurantRouter);
-
 
 addErrorHandlers(app);
 export default app;
