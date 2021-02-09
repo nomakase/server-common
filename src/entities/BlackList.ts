@@ -5,6 +5,7 @@ export class BlackList {
     public static readonly MAX_REMAINING = 86400; //sec
     public static readonly REASON_REFRESH = "0";
     public static readonly REASON_NEW_SIGNIN = "1";
+    public static readonly REASON_SIGNOUT = "2";
     
     private static readonly ACCESS_TOKEN_PREFIX = "ACCESS:";
     //private static readonly REFRESH_TOKEN_PREFIX = "REFRESH:";

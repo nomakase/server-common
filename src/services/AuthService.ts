@@ -72,13 +72,25 @@ export default class AuthService {
     
     return { accessToken, refreshToken, isSubmitted, isApproved };
   }
+  
+  async signOut(accessToken: string) {
+    // TODO: Define JWT-return-type.
+    const accessTokenID = (JWT.decodeAccess(accessToken) as any).jti;
+    const remaining = JWT.getAccessTokenRemainingTime(accessToken);
+    await this._revokeAccessToken(accessTokenID, BlackList.REASON_SIGNOUT, remaining);
+    
+    const decodedUserInfo = JWT.decodeAccess(accessToken, true) as AccessTokenPayload;
+    await this._updateTokenInfo(decodedUserInfo.email, null, null);
+    
+    return true;
+  }
 
-  private async _updateTokenInfo(user: string | Manager, accessToken: string, refreshToken: string) {
+  private async _updateTokenInfo(user: string | Manager, accessToken: string | null, refreshToken: string | null) {
     const userToSignIn = 
       (typeof user === "string") ? await this._getUser(user) : user;
     
-    const accessTokenID = (JWT.decodeAccess(accessToken) as any).jti;
-    const refreshTokenID = (JWT.decodeRefresh(refreshToken) as any).jti ;
+    const accessTokenID = accessToken ? (JWT.decodeAccess(accessToken) as any).jti : null;
+    const refreshTokenID = refreshToken ? (JWT.decodeRefresh(refreshToken) as any).jti : null;
     userToSignIn.accessTokenID = accessTokenID;
     userToSignIn.refreshTokenID = refreshTokenID;
     

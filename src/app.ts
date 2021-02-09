@@ -5,6 +5,7 @@ import addErrorHandlers from "./routes/errorHandlers";
 import restaurantRouter from "./routes/restaurantRouter";
 import signInRouter from "./routes/signInRouter";
 import signUpRouter from "./routes/signUpRouter";
+import signOutRouter from "./routes/signOutRouter";
 
 const app = express();
 
@@ -23,6 +24,7 @@ app.use(/\/((?!sign).)*/, authenticate);
 
 app.use("/signIn", signInRouter);
 app.use("/signUp", signUpRouter);
+app.use("/signOut", signOutRouter);
 app.use("/restaurant", restaurantRouter);
 
 addErrorHandlers(app);
