@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import JWT from "../auth/JWT";
 import { NoTokenError, InvalidAccessTokenError, AnotherDeviceDetectedError } from "../errors";
 import { BlackList } from "../entities/BlackList";
+import { AccessTokenPayload, JwtPayload } from "@custom-types/jsonwebtoken";
 
 export default async function authenticate(
   req: Request,
@@ -14,7 +15,7 @@ export default async function authenticate(
     return;
   }
   
-  const decoded: any = JWT.verifyAccess(accessToken);
+  const decoded = JWT.verifyAccess(accessToken) as JwtPayload<AccessTokenPayload>;
   if (!decoded) {
     next(InvalidAccessTokenError);
     return;

@@ -1,10 +1,11 @@
-import JWT, { AccessTokenPayload } from "../auth/JWT";
+import JWT from "../auth/JWT";
 import OAuth from "../auth/OAuth/interface/OAuth";
 import { Manager } from "../entities/Manager";
 import { InvalidOAuthTokenError, OAuthPermissionError, 
   InvalidRefreshTokenError, NoMatchedUserError, 
   AnotherDeviceDetectedError, InvalidAccessTokenError } from "../errors";
 import { BlackList } from "../entities/BlackList";
+import { AccessTokenPayload, JwtPayload, RefreshTokenPayload } from "@custom-types/jsonwebtoken";
 
 // TODO: Need to refactor for reusability.(divide)
 
@@ -74,12 +75,13 @@ export default class AuthService {
   }
   
   async signOut(accessToken: string) {
-    // TODO: Define JWT-return-type.
-    const accessTokenID = (JWT.decodeAccess(accessToken) as any).jti;
+    const decodeAccess = JWT.decodeAccess(accessToken) as JwtPayload<AccessTokenPayload>;
+
+    const accessTokenID = decodeAccess.jti;
     const remaining = JWT.getAccessTokenRemainingTime(accessToken);
     await this._revokeAccessToken(accessTokenID, BlackList.REASON_SIGNOUT, remaining);
     
-    const decodedUserInfo = JWT.decodeAccess(accessToken, true) as AccessTokenPayload;
+    const decodedUserInfo = decodeAccess.payload;
     await this._updateTokenInfo(decodedUserInfo.email, null, null);
     
     return true;
@@ -89,8 +91,8 @@ export default class AuthService {
     const userToSignIn = 
       (typeof user === "string") ? await this._getUser(user) : user;
     
-    const accessTokenID = accessToken ? (JWT.decodeAccess(accessToken) as any).jti : null;
-    const refreshTokenID = refreshToken ? (JWT.decodeRefresh(refreshToken) as any).jti : null;
+    const accessTokenID = accessToken ? (JWT.decodeAccess(accessToken) as JwtPayload<AccessTokenPayload>).jti : null;
+    const refreshTokenID = refreshToken ? (JWT.decodeRefresh(refreshToken) as JwtPayload<RefreshTokenPayload>).jti : null;
     userToSignIn.accessTokenID = accessTokenID;
     userToSignIn.refreshTokenID = refreshTokenID;
     

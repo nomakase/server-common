@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import hash from "../utils/hash";
+import { AccessTokenPayload, JwtPayload, RefreshTokenPayload } from "@custom-types/jsonwebtoken";
 
 export default class JWT {
   private static secretKeyA = process.env.ACCESS_SECRET as jwt.Secret;
@@ -27,29 +28,32 @@ export default class JWT {
 
   static verifyAccess = (token: string) => {
     try {
-      return jwt.verify(token, JWT.secretKeyA);
+      return jwt.verify(token, JWT.secretKeyA) as JwtPayload<AccessTokenPayload>;
     } catch (error) {
       return null;
     }
   };
   
-  static decodeAccess = (token: string, extractPayload: boolean = false) => {
+  static decodeAccess = (token: string, extractPayload: boolean = false) => {  
     try {
+      const decodeAccess = jwt.verify(token, JWT.secretKeyA, {ignoreExpiration: true}) as JwtPayload<AccessTokenPayload>;
       if (extractPayload){
-        const payload = (jwt.verify(token, JWT.secretKeyA, {ignoreExpiration: true}) as any).payload;
-        return new AccessTokenPayload(payload._email);
+        return decodeAccess.payload;
       }
       
-      return jwt.verify(token, JWT.secretKeyA, {ignoreExpiration: true});
+      return decodeAccess;
     } catch (error) {
       return null;
     }
   }
   
   static getAccessTokenRemainingTime(token: string) {
-    const decodedAccessToken = JWT.decodeAccess(token) as any;
-    const remaining = decodedAccessToken.exp - Math.floor(Date.now()/1000);
-    
+    const decodedAccessToken = JWT.decodeAccess(token) as JwtPayload<AccessTokenPayload>;
+    let remaining = 0;
+    if (decodedAccessToken?.exp) {
+      remaining = decodedAccessToken.exp - Math.floor(Date.now()/1000);
+    }
+
     return remaining > 0 ? remaining : 0;
   }
 
@@ -68,16 +72,16 @@ export default class JWT {
     deviceID: string
   ) => {
     try {
-      const decodedAccessToken = JWT.decodeAccess(accessToken) as any;
+      const decodedAccessToken = JWT.decodeAccess(accessToken) as JwtPayload<AccessTokenPayload>;
       const accessTokenID = decodedAccessToken.jti;
 
-      const decodedRefreshToken = jwt.verify(refreshToken, JWT.secretKeyR) as any;
+      const decodedRefreshToken = jwt.verify(refreshToken, JWT.secretKeyR) as JwtPayload<RefreshTokenPayload>;
       const refreshTokenPayload = decodedRefreshToken.payload;
 
       // Check token pair using jti and deviceID.
       if (
-        refreshTokenPayload._deviceID == deviceID &&
-        refreshTokenPayload._hashedAccessTokenID == hash(accessTokenID)
+        refreshTokenPayload.deviceID == deviceID &&
+        refreshTokenPayload.hashedAccessTokenID == hash(accessTokenID)
       ) {
         
         return decodedRefreshToken;
@@ -88,35 +92,38 @@ export default class JWT {
         throw error;
       }
     } catch (error) {
-      throw null;
+      return null;
     }
   };
   
   static decodeRefresh = (token: string) => {
     try {
-      return jwt.verify(token, JWT.secretKeyR, {ignoreExpiration: true});
+      return jwt.verify(token, JWT.secretKeyR, {ignoreExpiration: true}) as JwtPayload<RefreshTokenPayload>;
     } catch (error) {
-      throw null;
+      return null;
     }
   }
   
   static getRefreshTokenRemainingTime(token: string) {
-    const decodedRefreshToken = JWT.decodeRefresh(token) as any;
-    const remaining = decodedRefreshToken.exp - Math.floor(Date.now()/1000);
-    
+    const decodedRefreshToken = JWT.decodeRefresh(token) as JwtPayload<RefreshTokenPayload>;
+    let remaining = 0;
+    if (decodedRefreshToken?.exp) {
+      remaining = decodedRefreshToken.exp - Math.floor(Date.now()/1000);
+    }
+
     return remaining > 0 ? remaining : 0;
   }
 
   static signTokenPair = (email: string, deviceID: string) => {
-    const accessTokenPayload = new AccessTokenPayload(email);
+    const accessTokenPayload: AccessTokenPayload = { email };
     const accessTokenID = JWT._generateJWTID(email)
     const accessToken = JWT.signAccess(accessTokenPayload, accessTokenID);
 
     // Use hashed access token.
-    const refreshTokenPayload = new RefreshTokenPayload(
-      hash(accessTokenID),
-      deviceID
-    );
+    const refreshTokenPayload: RefreshTokenPayload = {
+      hashedAccessTokenID: hash(accessTokenID),
+      deviceID,
+    };
     const refreshToken = JWT.signRefresh(refreshTokenPayload);
 
     return { accessToken, refreshToken };
@@ -127,35 +134,3 @@ export default class JWT {
   }
 }
 
-// TODO: change into type
-class AccessTokenPayload {
-  private readonly _email: string;
-
-  constructor(email: string) {
-    this._email = email;
-  }
-
-  get email(): string {
-    return this._email;
-  }
-}
-
-class RefreshTokenPayload {
-  private readonly _hashedAccessTokenID: string;
-  private readonly _deviceID: string;
-
-  constructor(hashedAccessTokenID: string, deviceID: string) {
-    this._hashedAccessTokenID = hashedAccessTokenID;
-    this._deviceID = deviceID;
-  }
-
-  get hashedAccessTokenID(): string {
-    return this._hashedAccessTokenID;
-  }
-
-  get deviceID(): string {
-    return this._deviceID;
-  }
-}
-
-export { AccessTokenPayload, RefreshTokenPayload };
