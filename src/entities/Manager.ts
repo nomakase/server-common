@@ -8,10 +8,10 @@ export class Manager extends BaseEntity {
   @Column({ unique: true })
   email: string;
   
-  @Column({ nullable: true })
+  @Column({ type: "varchar", nullable: true })
   accessTokenID: string | null;
   
-  @Column({ nullable: true })
+  @Column({ type: "varchar", nullable: true })
   refreshTokenID: string | null;
   
   @Column({ default: false })
