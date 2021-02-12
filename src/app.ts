@@ -6,6 +6,7 @@ import restaurantRouter from "./routes/restaurantRouter";
 import signInRouter from "./routes/signInRouter";
 import signUpRouter from "./routes/signUpRouter";
 import signOutRouter from "./routes/signOutRouter";
+import noShowRouter from "./routes/noShowRouter";
 
 const app = express();
 
@@ -26,6 +27,7 @@ app.use("/signIn", signInRouter);
 app.use("/signUp", signUpRouter);
 app.use("/signOut", signOutRouter);
 app.use("/restaurant", restaurantRouter);
+app.use("/noShow", noShowRouter);
 
 addErrorHandlers(app);
 export default app;
