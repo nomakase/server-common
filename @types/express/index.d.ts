@@ -1,4 +1,5 @@
-import { Response } from "express";
+import { AccessTokenPayload } from "@custom-types/jsonwebtoken";
+import { Response, Request } from "express";
 
 type Overwrite<T, U> = Omit<T, keyof U> & U;
 
@@ -20,7 +21,6 @@ export type SignInResponse = TypedResponse<SignInBody>;
 
 export type ErrorBody = { type: string; status: number; message: string; errorCode: number; };
 export type ErrorResponse = TypedResponse<ErrorBody>;
-// export type CustomError = Overwrite<Error, { name?: string }> & {
-//   type: string;
-//   code: number;
-// };
+
+export type Identifier = { Identifier: AccessTokenPayload };
+export type AuthorizedRequest = Request & Identifier;
