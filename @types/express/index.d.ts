@@ -22,5 +22,5 @@ export type SignInResponse = TypedResponse<SignInBody>;
 export type ErrorBody = { type: string; status: number; message: string; errorCode: number; };
 export type ErrorResponse = TypedResponse<ErrorBody>;
 
-export type Identifier = { Identifier: AccessTokenPayload };
+export type Identifier = { Identifier?: AccessTokenPayload };
 export type AuthorizedRequest = Request & Identifier;
