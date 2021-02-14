@@ -29,9 +29,7 @@ export default class AuthService {
     }
     
     const { accessToken, refreshToken } = JWT.signTokenPair(email, deviceID);
-    
-    const updatedUser = await this._updateTokenInfo(userToSignIn, accessToken, refreshToken);
-    const { isSubmitted, isApproved } = updatedUser;
+    const { isSubmitted, isApproved } = await this._updateTokenInfo(userToSignIn, accessToken, refreshToken);
     
     return { accessToken, refreshToken, isSubmitted, isApproved };
   }
@@ -67,9 +65,7 @@ export default class AuthService {
     }
     
     const { accessToken, refreshToken } = JWT.signTokenPair(decodedUserInfo.email, deviceID);
-    
-    const updatedUser = await this._updateTokenInfo(userToSignIn, accessToken, refreshToken);
-    const { isSubmitted, isApproved } = updatedUser;
+    const { isSubmitted, isApproved } = await this._updateTokenInfo(userToSignIn, accessToken, refreshToken);
     
     return { accessToken, refreshToken, isSubmitted, isApproved };
   }
