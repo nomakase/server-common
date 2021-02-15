@@ -1,5 +1,5 @@
 import express from "express";
-import tokenParser from"./middlewares/tokenParser";
+import tokenParser from "./middlewares/tokenParser";
 import authenticate from "./middlewares/authenticate";
 import addErrorHandlers from "./routes/errorHandlers";
 import restaurantRouter from "./routes/restaurantRouter";
@@ -7,12 +7,15 @@ import signInRouter from "./routes/signInRouter";
 import signUpRouter from "./routes/signUpRouter";
 import signOutRouter from "./routes/signOutRouter";
 import noShowRouter from "./routes/noShowRouter";
+import cors from "cors";
 
 const app = express();
 
 app.use(express.static(__dirname + "/public"));
 app.use(express.json());
 // app.use(express.urlencoded({ extended: false }));
+
+app.use(cors());
 
 app.use("/", (req, _res, next) => {
   console.log(req.originalUrl);
