@@ -7,6 +7,7 @@ import signInRouter from "./routes/signInRouter";
 import signUpRouter from "./routes/signUpRouter";
 import signOutRouter from "./routes/signOutRouter";
 import noShowRouter from "./routes/noShowRouter";
+import adminRouter from "./routes/adminRouter";
 import cors from "cors";
 
 const app = express();
@@ -24,13 +25,14 @@ app.use("/", (req, _res, next) => {
 
 // Need to authenticate except for the url starting with "sign".
 app.use(tokenParser);
-app.use(/\/((?!sign).)*/, authenticate);
+app.use(/^\/(?!sign).*$/, authenticate);
 
 app.use("/signIn", signInRouter);
 app.use("/signUp", signUpRouter);
 app.use("/signOut", signOutRouter);
 app.use("/restaurant", restaurantRouter);
 app.use("/noShow", noShowRouter);
+app.use("/signAdmin", adminRouter);
 
 addErrorHandlers(app);
 export default app;
