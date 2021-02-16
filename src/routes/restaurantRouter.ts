@@ -144,7 +144,7 @@ router.get("/management", async (_req, res) => {
 })
 
 // TODO: 음식점 인증 과정을 추가해야합니다.
-router.put("/management/:id", async (req, res) => {
+router.put("/management/:id", async (req, _res) => {
   console.log(req.params.id);
 })
 
