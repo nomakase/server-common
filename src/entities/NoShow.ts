@@ -13,6 +13,9 @@ export class NoShow extends BaseEntity {
   id: number;
 
   @Column()
+  writer: string;
+
+  @Column()
   costPrice: number;
 
   @Column({ nullable: true })
