@@ -23,16 +23,16 @@ app.use("/", (req, _res, next) => {
   next();
 });
 
-// Need to authenticate except for the url starting with "sign".
+// Need to authenticate except for the url starting with "sign" or "admin".
 app.use(tokenParser);
-app.use(/^\/(?!sign).*$/, authenticate);
+app.use(/^\/(?!sign|admin).*$/, authenticate);
 
 app.use("/signIn", signInRouter);
 app.use("/signUp", signUpRouter);
 app.use("/signOut", signOutRouter);
 app.use("/restaurant", restaurantRouter);
 app.use("/noShow", noShowRouter);
-app.use("/signAdmin", adminRouter);
+app.use("/admin", adminRouter);
 
 addErrorHandlers(app);
 export default app;
