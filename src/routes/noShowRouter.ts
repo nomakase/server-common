@@ -1,3 +1,4 @@
+import { AuthorizedRequest } from "@custom-types/express";
 import express from "express";
 import { NoShow } from "../entities/NoShow";
 import { MissingPrameterError } from "../errors";
@@ -51,20 +52,18 @@ router.put("/", async (req, res, next) => {
     }
 });
 
-router.delete("/", async (req, res, next) => {
+router.delete("/", async (req: AuthorizedRequest, res, next) => {
     try {
         const posting: Partial<NoShow> = req.body;
         if (!(posting.id)){
             throw MissingPrameterError;
         }
-
+        posting.writer = req.Identifier!.email;
+        
         const postingService = new PostingService();
-        postingService;
-        //const delResult = postingService.deletePosting(posting.id);
+        const result = postingService.deletePosting(posting.writer, posting.id);
         
-        
-        res.json({});
-
+        res.json({ result });
     } catch (err) {
         if (!(err instanceof CustomError)) {
             console.error("Unhandled Error occured.");
