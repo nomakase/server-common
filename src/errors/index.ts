@@ -4,6 +4,7 @@ import { CustomError } from "./CustomError";
 export const MissingParameterError = new CustomError("MissingParameterError", 400, 4000, "Required params are missing.");
 export const InvalidEmailError = new CustomError("Unexpected Email", 400, 4001, "Please check email address");
 export const InvalidPhoneNumberError = new CustomError("Invalid Phone Number", 400, 4002, "Please check phone number");
+export const InvalidParameterError = new CustomError("InvalidParameterError", 400, 4003, "Invalid params are detected.");
 
 // Authentication Errors
 export const NoTokenError = new CustomError("NoTokenError", 401, 4010, "Missing access token to verify in Authorization header.");
