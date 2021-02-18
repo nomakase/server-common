@@ -1,7 +1,7 @@
 import { AuthorizedRequest } from "@custom-types/express";
 import express from "express";
 import { NoShow } from "../entities/NoShow";
-import { MissingPrameterError } from "../errors";
+import { MissingParameterError } from "../errors";
 import { CustomError } from "../errors/CustomError";
 import PostingService from "../services/PostingService";
 
@@ -18,14 +18,14 @@ router.post("/", async (req, res, next) => {
     try {
         const posting: NoShow = req.body;
         console.log(posting);
-        if (!(posting.costPrice && posting.from && posting.to && posting.skeleton && posting.maxPeople)){
-            throw MissingPrameterError;
+        if (!(posting.costPrice && posting.from && posting.to && posting.maxPeople)){
+            throw MissingParameterError;
         }
 
         const postingService = new PostingService();
-        postingService;
-        
-        res.json({});
+        const result = await postingService.createPosting(posting);
+
+        res.json({ postingID: result.id });
 
     } catch (err) {
         if (!(err instanceof CustomError)) {
@@ -34,14 +34,13 @@ router.post("/", async (req, res, next) => {
         } 
         next(err);
     }
-
 });
 
 router.put("/", async (req, res, next) => {
     try {
         const posting: Partial<NoShow> = req.body;
         if (!(posting.id)){
-            throw MissingPrameterError;
+            throw MissingParameterError;
         }
 
         const postingService = new PostingService();
@@ -63,7 +62,7 @@ router.delete("/", async (req: AuthorizedRequest, res, next) => {
     try {
         const posting: Partial<NoShow> = req.body;
         if (!(posting.id && posting.writer)){
-            throw MissingPrameterError;
+            throw MissingParameterError;
         }
         
         const postingService = new PostingService();
