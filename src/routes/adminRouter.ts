@@ -1,7 +1,7 @@
 import express from "express";
 import { Admin } from "../entities/Admin";
 import JWT from "../auth/JWT";
-import { MissingPrameterError, NoMatchedUserError } from "../errors";
+import { MissingParameterError, NoMatchedUserError } from "../errors";
 import hash from "../utils/hash";
 import { BlackList } from "../entities/BlackList";
 import { JwtPayload, AccessTokenPayload } from "@custom-types/jsonwebtoken";
@@ -14,7 +14,7 @@ router.post("/signIn", async (req, res, next) => {
         const pw = req.body.pw || req.body.password;
         
         if (!(id || pw)) {
-            throw MissingPrameterError;
+            throw MissingParameterError;
         }
         
         const admin = await Admin.findOne({ id:hash(id), pw:hash(pw) });
@@ -33,6 +33,5 @@ router.post("/signIn", async (req, res, next) => {
     }
 
 })
-
 
 export default router;

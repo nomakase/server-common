@@ -4,7 +4,7 @@ import fs from "fs";
 import path from "path";
 import { Restaurant } from "../entities/Restaurant";
 import { RestaurantPhoto } from "../entities/RestaurantPhoto";
-import { MissingPrameterError, InvalidPhoneNumberError, DuplicatedPhoneNumberError, WrongIdentifierError } from "../errors";
+import { MissingParameterError, InvalidPhoneNumberError, DuplicatedPhoneNumberError, WrongIdentifierError } from "../errors";
 
 const router = express.Router();
 const storage = diskStorage({
@@ -27,7 +27,7 @@ const upload = multer({ storage });
 router.post("/", upload.array("photos", 5), async (req, _res, next) => {
   const { name, phoneNumber, address, openningHour, breakTime, description }: Partial<Restaurant> = req.body;
   if (!(name && phoneNumber && address)) {
-    return next(MissingPrameterError);
+    return next(MissingParameterError);
   }
 
   const regex = /\d{2,3}-\d{3,4}-\d{4}/;
@@ -94,7 +94,7 @@ router.post("/", async (req, res, next) => {
 router.put("/", async (req, res, next) => {
   const { id, name, phoneNumber, address, openningHour, breakTime, description }: Partial<Restaurant> = req.body;
 
-  if (!id) return next(MissingPrameterError);
+  if (!id) return next(MissingParameterError);
 
   const restaurantToUpdate = await Restaurant.findOne({ id });
   if (!restaurantToUpdate) return next(WrongIdentifierError);

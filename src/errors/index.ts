@@ -1,7 +1,7 @@
 import { CustomError } from "./CustomError";
 
 // Common Errors
-export const MissingPrameterError = new CustomError("MissingPrameterError", 400, 4000, "Required params are missing.");
+export const MissingParameterError = new CustomError("MissingParameterError", 400, 4000, "Required params are missing.");
 export const InvalidEmailError = new CustomError("Unexpected Email", 400, 4001, "Please check email address");
 export const InvalidPhoneNumberError = new CustomError("Invalid Phone Number", 400, 4002, "Please check phone number");
 

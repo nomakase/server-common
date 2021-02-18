@@ -1,6 +1,6 @@
 import express from "express";
 import OAuth from "../auth/OAuth";
-import { DuplicatedEmailError, InvalidOAuthTokenError, MissingPrameterError, OAuthPermissionError } from "../errors";
+import { DuplicatedEmailError, InvalidOAuthTokenError, MissingParameterError, OAuthPermissionError } from "../errors";
 import { Manager } from "../entities/Manager";
 
 const router = express.Router();
@@ -9,7 +9,7 @@ router.post("/:authServer", async (req, res, next) => {
   const authServer = OAuth[req.params.authServer?.toLowerCase()]?.create();
   const oauthToken = req.body.OAuthToken;
 
-  if (!oauthToken) return next(MissingPrameterError);
+  if (!oauthToken) return next(MissingParameterError);
 
   let isAuthenticated;
   try {

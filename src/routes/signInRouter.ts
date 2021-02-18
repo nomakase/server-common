@@ -1,7 +1,7 @@
 import express from "express";
 import { SignInResponse } from "@custom-types/express";
 import OAuth from "../auth/OAuth";
-import { MissingPrameterError } from "../errors";
+import { MissingParameterError } from "../errors";
 import AuthService from "../services/AuthService";
 
 const router = express.Router();
@@ -19,7 +19,7 @@ router.post(
 
     try {
       if (!(authServer && deviceID && oauthToken)) {
-        throw MissingPrameterError;
+        throw MissingParameterError;
       }
 
       const auth = new AuthService(authServer.create());
@@ -52,7 +52,7 @@ router.post("/signInAuto", async (req, res: SignInResponse, next) => {
 
   try {
     if (!(accessToken && refreshToken && deviceID)) {
-      throw MissingPrameterError;
+      throw MissingParameterError;
     }
 
     const signedInUser = await auth.signInAuto(
