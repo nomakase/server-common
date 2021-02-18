@@ -8,9 +8,16 @@ import PostingService from "../services/PostingService";
 //default url path: 
 const router =  express.Router();
 
+// Set Authorized user as a writer.
+router.use("/", (req: AuthorizedRequest, _res, next) => {
+    req.body.writer = req.Identifier!.email;
+    next();
+})
+
 router.post("/", async (req, res, next) => {
     try {
-        const posting: Partial<NoShow> = req.body;
+        const posting: NoShow = req.body;
+        console.log(posting);
         if (!(posting.costPrice && posting.from && posting.to && posting.skeleton && posting.maxPeople)){
             throw MissingPrameterError;
         }
@@ -55,10 +62,9 @@ router.put("/", async (req, res, next) => {
 router.delete("/", async (req: AuthorizedRequest, res, next) => {
     try {
         const posting: Partial<NoShow> = req.body;
-        if (!(posting.id)){
+        if (!(posting.id && posting.writer)){
             throw MissingPrameterError;
         }
-        posting.writer = req.Identifier!.email;
         
         const postingService = new PostingService();
         const result = postingService.deletePosting(posting.writer, posting.id);
