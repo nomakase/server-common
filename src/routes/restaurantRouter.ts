@@ -4,7 +4,7 @@ import fs from "fs";
 import path from "path";
 import { Restaurant } from "../entities/Restaurant";
 import { RestaurantPhoto } from "../entities/RestaurantPhoto";
-import { MissingParameterError, InvalidPhoneNumberError, DuplicatedPhoneNumberError, WrongIdentifierError } from "../errors";
+import { MissingParameterError, InvalidPhoneNumberError, DuplicatedPhoneNumberError, InstanceNotFoundError } from "../errors";
 
 const router = express.Router();
 const storage = diskStorage({
@@ -97,7 +97,7 @@ router.put("/", async (req, res, next) => {
   if (!id) return next(MissingParameterError);
 
   const restaurantToUpdate = await Restaurant.findOne({ id });
-  if (!restaurantToUpdate) return next(WrongIdentifierError);
+  if (!restaurantToUpdate) return next(InstanceNotFoundError);
 
   try {
     await Restaurant.update(id, {
@@ -123,29 +123,6 @@ router.put("/", async (req, res, next) => {
     return;
   }
   res.send({ id })
-})
-
-// TODO: 토큰을 검증해야합니다.
-router.get("/management", async (_req, res) => {
-  const restaurants = await Restaurant.find({ where: {} });
-  const restaurantsWithPhotos = await Promise.all(restaurants.map(async (restaurant) => {
-    const photos = await RestaurantPhoto.find({
-      relations: ["restaurant"],
-      where: { restaurant: { id: restaurant.id } }
-    });
-
-    return {
-      ...restaurant,
-      images: photos.map(({ filePath }) => filePath)
-    }
-  }));
-
-  res.send(restaurantsWithPhotos);
-})
-
-// TODO: 음식점 인증 과정을 추가해야합니다.
-router.put("/management/:id", async (req, _res) => {
-  console.log(req.params.id);
 })
 
 export default router;

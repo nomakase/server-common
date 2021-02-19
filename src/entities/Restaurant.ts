@@ -33,4 +33,7 @@ export class Restaurant extends BaseEntity {
 
   @OneToMany(() => RestaurantPhoto, (photos) => photos.restaurant)
   photos: RestaurantPhoto[];
+
+  @Column({ type: "int", default: 0 })
+  verfication: number;
 }
