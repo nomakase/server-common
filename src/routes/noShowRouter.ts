@@ -66,7 +66,7 @@ router.delete("/", async (req: AuthorizedRequest, res, next) => {
         }
         
         const postingService = new PostingService();
-        const result = postingService.deletePosting(posting.writer, posting.id);
+        const result =  await postingService.deletePosting(posting.writer, posting.id);
         
         res.json({ result });
     } catch (err) {
