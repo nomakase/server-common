@@ -12,8 +12,8 @@ export default class PostingService{
                 (Number(posting.salePrice) >= Number(posting.costPrice)))) ||
             (new Date(posting.to) <= new Date()) || 
             (posting.from >= posting.to) ||
-            (Number(posting.minPeople < 1) ||
-            (Number(posting.minPeople) > Number(posting.maxPeople)))) {
+            (Number(posting.minPeople) < 1) ||
+            (Number(posting.minPeople) > Number(posting.maxPeople))) {
             throw InvalidParameterError;
         }
 
