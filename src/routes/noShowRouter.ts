@@ -26,7 +26,6 @@ router.post("/", async (req, res, next) => {
         const result = await postingService.createPosting(posting);
 
         res.json({ postingID: result.id });
-
     } catch (err) {
         if (!(err instanceof CustomError)) {
             console.error("Unhandled Error occured.");
@@ -44,11 +43,9 @@ router.put("/", async (req, res, next) => {
         }
 
         const postingService = new PostingService();
-        postingService;
+        const result = await postingService.updatePosting(posting);
         
-        
-        res.json({});
-
+        res.json({ postingID: result.id });
     } catch (err) {
         if (!(err instanceof CustomError)) {
             console.error("Unhandled Error occured.");
