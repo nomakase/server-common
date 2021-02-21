@@ -7,8 +7,11 @@ import { BlackList } from "../entities/BlackList";
 import { JwtPayload, AccessTokenPayload } from "@custom-types/jsonwebtoken";
 import { Restaurant } from "../entities/Restaurant";
 import { RestaurantPhoto } from "../entities/RestaurantPhoto";
+import authenticator from "../middlewares/authenticator";
 
 const router = express.Router();
+
+router.use(/^\/(?!signIn).*$/, authenticator.admin);
 
 router.post("/signIn", async (req, res, next) => {
     try {
@@ -26,14 +29,15 @@ router.post("/signIn", async (req, res, next) => {
 
         const accessToken = JWT.signAccess({ email: id });
         const tokenID = (JWT.decodeAccess(accessToken) as JwtPayload<AccessTokenPayload>).jti;
-        await BlackList.addAccessToken(tokenID, "0", BlackList.MAX_REMAINING);
+        
+        // TODO: Refactor
+        // Use blacklist as a whitelist only for admin token.
+        await BlackList.addAdminToken(tokenID);
 
         res.json({ accessToken });
-
     } catch (err) {
         next(err);
     }
-
 })
 
 // TODO: 토큰을 검증해야합니다.

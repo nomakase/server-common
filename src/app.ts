@@ -1,6 +1,6 @@
 import express from "express";
 import tokenParser from "./middlewares/tokenParser";
-import authenticate from "./middlewares/authenticate";
+import authenticator from "./middlewares/authenticator";
 import addErrorHandlers from "./routes/errorHandlers";
 import restaurantRouter from "./routes/restaurantRouter";
 import signInRouter from "./routes/signInRouter";
@@ -25,7 +25,7 @@ app.use("/", (req, _res, next) => {
 
 // Need to authenticate except for the url starting with "sign" or "admin".
 app.use(tokenParser);
-app.use(/^\/(?!sign|admin).*$/, authenticate);
+app.use(/^\/(?!sign|admin).*$/, authenticator.user);
 
 app.use("/signIn", signInRouter);
 app.use("/signUp", signUpRouter);
