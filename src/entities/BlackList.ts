@@ -8,14 +8,34 @@ export class BlackList {
     public static readonly REASON_SIGNOUT = "2";
     
     private static readonly ACCESS_TOKEN_PREFIX = "ACCESS:";
-    //private static readonly REFRESH_TOKEN_PREFIX = "REFRESH:";
+    private static readonly ADMIN_TOKEN_PREFIX = "ADMIN:";
     
     private static readonly SET_SUCCESS = "OK";
     private static readonly EXPIRE_SUCCESS = 1;
+    private static readonly DUMMY = "o";
     
-    
-    static addAccessToken = async (jti: string, reason: string, expiresIn: number) => {
-        const key = BlackList.ACCESS_TOKEN_PREFIX + jti;
+    /* ACCESS TOKEN */
+    public static addAccessToken = async (jti: string, reason: string, expiresIn: number) => {
+        return await BlackList.addToken(BlackList.ACCESS_TOKEN_PREFIX, jti, reason, expiresIn); 
+    }
+
+    public static findAccessToken = async (jti: string) => {
+        return await BlackList.findToken(BlackList.ACCESS_TOKEN_PREFIX, jti);
+    }
+
+    /* ADMIN TOKEN */
+    public static addAdminToken = async (jti: string) => {
+        await BlackList.addToken(BlackList.ACCESS_TOKEN_PREFIX, jti, BlackList.DUMMY, BlackList.MAX_REMAINING);
+        return await BlackList.addToken(BlackList.ADMIN_TOKEN_PREFIX, jti, BlackList.DUMMY, BlackList.MAX_REMAINING);
+    }
+
+    public static findAdminToken = async (jti: string) => {
+        return await BlackList.findToken(BlackList.ADMIN_TOKEN_PREFIX, jti);
+    }
+
+
+    private static addToken = async (prefix: string, jti: string, reason: string, expiresIn: number) => {
+        const key = prefix + jti;
         
         try {
             let res: any = await Promise.resolve()
@@ -38,16 +58,13 @@ export class BlackList {
         }
     }
     
-    static findAccessToken = async (jti: string): Promise<any> => {
+    private static findToken = async (prefix: string, jti: string): Promise<any> => {
         try {
             return await Promise.resolve().then(
-                () => Redis.getClient().get(BlackList.ACCESS_TOKEN_PREFIX + jti));
+                () => Redis.getClient().get(prefix + jti));
         } catch (err) {
             console.error(err);
             throw err;
         }
     }
-    
-    //static addRefreshToken(jti: string) {}
-    //static findRefreshToken(jti: string) {}
 }
