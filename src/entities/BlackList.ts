@@ -12,6 +12,7 @@ export class BlackList {
     
     private static readonly SET_SUCCESS = "OK";
     private static readonly EXPIRE_SUCCESS = 1;
+    private static readonly DEL_SUCCESS = 1;
     private static readonly DUMMY = "o";
     
     /* ACCESS TOKEN */
@@ -31,6 +32,10 @@ export class BlackList {
 
     public static findAdminToken = async (jti: string) => {
         return await BlackList.findToken(BlackList.ADMIN_TOKEN_PREFIX, jti);
+    }
+
+    public static removeAdminToken = async (jti: string) => {
+        return await BlackList.removeToken(BlackList.ADMIN_TOKEN_PREFIX, jti);
     }
 
 
@@ -61,9 +66,23 @@ export class BlackList {
     private static findToken = async (prefix: string, jti: string): Promise<any> => {
         try {
             return await Promise.resolve().then(
-                () => Redis.getClient().get(prefix + jti));
+                () => Redis.getClient().GET(prefix + jti));
         } catch (err) {
             console.error(err);
+            throw err;
+        }
+    }
+
+    private static removeToken = async (prefix: string, jti: string): Promise<any> => {
+        try {
+            const res: any = await Promise.resolve().then(
+                () => Redis.getClient().DEL(prefix + jti));
+
+            if (res !== BlackList.DEL_SUCCESS) {
+                throw new Error("Fail to delete key in Redis.");
+            }
+        } catch (err) {
+            console.log(err);
             throw err;
         }
     }

@@ -40,6 +40,21 @@ router.post("/signIn", async (req, res, next) => {
     }
 })
 
+router.post("/signOut", async (req, res, next) => {
+    try {
+        const accessToken = req.headers.authorization!;
+        const tokenID = (JWT.decodeAccess(accessToken) as JwtPayload<AccessTokenPayload>).jti;
+
+        // TODO: Refactor
+        // Use blacklist as a whitelist only for admin token.
+        await BlackList.removeAdminToken(tokenID);
+
+        res.json({ result:true });
+    } catch(err) {
+        next(err);
+    }
+})
+
 // TODO: 토큰을 검증해야합니다.
 router.post("/verification", async (req, res, next) => {
     const { id, status } = req.body;

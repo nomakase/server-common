@@ -11,6 +11,8 @@ export default class Redis {
     "SET",
     "get",
     "GET",
+    "del",
+    "DEL",
     "expire",
     "EXPIRE",
   ];
