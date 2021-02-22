@@ -2,7 +2,8 @@ import Redis from "../config/Redis";
 
 export class BlackList {
     
-    public static readonly MAX_REMAINING = 86400; //sec
+    private static readonly PADDING_TIME = 60; //sec 
+    public static readonly MAX_REMAINING = BlackList.PADDING_TIME + 86400; //1 day in sec
     public static readonly REASON_REFRESH = "0";
     public static readonly REASON_NEW_SIGNIN = "1";
     public static readonly REASON_SIGNOUT = "2";
@@ -51,7 +52,7 @@ export class BlackList {
             }
             
             res = await Promise.resolve()
-                .then(() => Redis.getClient().EXPIRE(key, expiresIn));
+                .then(() => Redis.getClient().EXPIRE(key, BlackList.PADDING_TIME + expiresIn));
                 
             if (res !== BlackList.EXPIRE_SUCCESS) {
                 throw new Error("Fail to set expiration time.");
