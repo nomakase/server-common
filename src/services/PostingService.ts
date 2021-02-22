@@ -37,6 +37,15 @@ export default class PostingService{
         }
     }
 
+    async getPosting(writer: string, postingID: number) {
+        const posting = await NoShow.findOne({ id:postingID, writer },);
+        if (!posting) {
+            throw InstanceNotFoundError;
+        }
+        
+        return posting;
+    }
+
     private _verifyParams(posting: NoShow) {
         if ((posting.salePrice && 
                 ((Number(posting.salePrice) < 0) || 
