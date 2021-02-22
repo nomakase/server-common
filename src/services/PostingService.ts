@@ -1,4 +1,4 @@
-import { InstanceNotFoundError, InvalidParameterError } from "../errors";
+import { InstanceNotFoundError, InvalidParameterError, QueryFailedError } from "../errors";
 import { NoShow } from "../entities/NoShow";
 
 export default class PostingService{
@@ -8,8 +8,12 @@ export default class PostingService{
             throw InvalidParameterError;
         }
 
-        const result = await NoShow.insert(posting);
-        return { id: result.identifiers[0].id }
+        try {
+            const result = await NoShow.insert(posting);
+            return { id: result.identifiers[0].id }
+        } catch (err) {
+            throw QueryFailedError;
+        }
     }
 
     async updatePosting(posting: Partial<NoShow>) {
@@ -23,8 +27,12 @@ export default class PostingService{
             throw InvalidParameterError;
         }
 
-        const updateResult = await NoShow.save(updatedPosting);
-        return { id: updateResult.id };
+        try {
+            const updateResult = await NoShow.save(updatedPosting);
+            return { id: updateResult.id };
+        } catch(err) {
+            throw QueryFailedError;
+        }
     }
 
     async deletePosting(writer: string, postingID: number) {
@@ -32,13 +40,12 @@ export default class PostingService{
             await NoShow.delete({ id:postingID, writer });
             return true
         } catch(err) {
-            console.error(err);
-            return false;
+            throw QueryFailedError;
         }
     }
 
     async getPosting(writer: string, postingID: number) {
-        const posting = await NoShow.findOne({ id:postingID, writer },);
+        const posting = await NoShow.findOne({ id:postingID, writer });
         if (!posting) {
             throw InstanceNotFoundError;
         }
@@ -47,14 +54,17 @@ export default class PostingService{
     }
 
     async getAllPosting(writer: string, from: number, to: number) {
-        const postings = await NoShow.find({
-            where: { writer },
-            order: { id: "ASC" },
-            skip: from,
-            take: to-from,
-        })
-
-        return postings;
+        try {
+            const postings = await NoShow.find({
+                where: { writer },
+                order: { id: "ASC" },
+                skip: from,
+                take: to-from,
+            });
+            return postings;
+        } catch(err) {
+            throw QueryFailedError;
+        }
     }
 
     private _verifyParams(posting: NoShow) {
