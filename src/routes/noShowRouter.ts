@@ -2,7 +2,6 @@ import { AuthorizedRequest } from "@custom-types/express";
 import express from "express";
 import { NoShow } from "../entities/NoShow";
 import { MissingParameterError } from "../errors";
-import { CustomError } from "../errors/CustomError";
 import PostingService from "../services/PostingService";
 
 //default url path: 
@@ -29,10 +28,6 @@ router.get("/all", async (req, res, next) => {
         
         res.json({ result });
     } catch (err) {
-        if (!(err instanceof CustomError)) {
-            console.error("Unhandled Error occured.");
-            console.error(err);
-        } 
         next(err);
     }
 })
@@ -51,10 +46,6 @@ router.get("/:postingID", async (req, res, next) => {
         
         res.json({ result });
     } catch (err) {
-        if (!(err instanceof CustomError)) {
-            console.error("Unhandled Error occured.");
-            console.error(err);
-        } 
         next(err);
     }
 })
@@ -72,10 +63,6 @@ router.post("/", async (req, res, next) => {
 
         res.json({ postingID: result.id });
     } catch (err) {
-        if (!(err instanceof CustomError)) {
-            console.error("Unhandled Error occured.");
-            console.error(err);
-        } 
         next(err);
     }
 });
@@ -92,10 +79,6 @@ router.put("/", async (req, res, next) => {
         
         res.json({ postingID: result.id });
     } catch (err) {
-        if (!(err instanceof CustomError)) {
-            console.error("Unhandled Error occured.");
-            console.error(err);
-        } 
         next(err);
     }
 });
@@ -104,7 +87,8 @@ router.delete("/", async (req: AuthorizedRequest, res, next) => {
     try {
         const posting: Partial<NoShow> = req.body;
         if (!(posting.id && posting.writer)){
-            throw MissingParameterError;
+            throw new Error("UUUU");
+            //throw MissingParameterError;
         }
         
         const postingService = new PostingService();
@@ -112,11 +96,6 @@ router.delete("/", async (req: AuthorizedRequest, res, next) => {
         
         res.json({ result });
     } catch (err) {
-        if (!(err instanceof CustomError)) {
-            console.error("Unhandled Error occured.");
-            console.error(err);
-        } 
-        
         next(err);
     }
 });
