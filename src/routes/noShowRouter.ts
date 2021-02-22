@@ -14,8 +14,27 @@ router.use("/", (req: AuthorizedRequest, _res, next) => {
     next();
 })
 
-router.get("/all", async (_req, res, _next) => {
-    res.json({});
+router.get("/all", async (req, res, next) => {
+    try {
+        const posting: Partial<NoShow> = req.body;
+        const from = Number(req.query.from);
+        const to = Number(req.query.to);
+        
+        if (!(posting.writer && (from >= 0) && (to >= 0))){
+            throw MissingParameterError;
+        }
+        
+        const postingService = new PostingService();
+        const result =  await postingService.getAllPosting(posting.writer, from, to);
+        
+        res.json({ result });
+    } catch (err) {
+        if (!(err instanceof CustomError)) {
+            console.error("Unhandled Error occured.");
+            console.error(err);
+        } 
+        next(err);
+    }
 })
 
 router.get("/:postingID", async (req, res, next) => {

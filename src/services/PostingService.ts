@@ -46,6 +46,17 @@ export default class PostingService{
         return posting;
     }
 
+    async getAllPosting(writer: string, from: number, to: number) {
+        const postings = await NoShow.find({
+            where: { writer },
+            order: { id: "ASC" },
+            skip: from,
+            take: to-from,
+        })
+
+        return postings;
+    }
+
     private _verifyParams(posting: NoShow) {
         if ((posting.salePrice && 
                 ((Number(posting.salePrice) < 0) || 
