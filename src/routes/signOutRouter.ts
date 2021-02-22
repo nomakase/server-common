@@ -1,10 +1,10 @@
 import express from "express";
-import authenticate from "../middlewares/authenticate";
+import authenticator from "../middlewares/authenticator";
 import AuthService from "../services/AuthService";
 
 const router = express.Router();
 
-router.use(authenticate);
+router.use(authenticator.user);
 
 router.post("/", async (req, res, next) => {
     try {

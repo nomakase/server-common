@@ -28,7 +28,7 @@ export class NoShow extends BaseEntity {
   to: Date;
 
   @Column({ default: 1 })
-  skeleton: number;
+  minPeople: number;
 
   @Column()
   maxPeople: number;

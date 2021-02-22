@@ -1,39 +1,83 @@
-import { InvalidParameterError } from "../errors";
+import { InstanceNotFoundError, InvalidParameterError, QueryFailedError } from "../errors";
 import { NoShow } from "../entities/NoShow";
 
 export default class PostingService{
 
     async createPosting(posting: NoShow) {
-        
-        // Verify params 
-        if ((posting.id) ||
-            (posting.salePrice && 
-                ((Number(posting.salePrice) < 0) || 
-                (Number(posting.salePrice) >= Number(posting.costPrice)))) ||
-            (new Date(posting.to) <= new Date()) || 
-            (posting.from >= posting.to) ||
-            (Number(posting.minPeople < 1) ||
-            (Number(posting.minPeople) > Number(posting.maxPeople)))) {
+        if ((posting.id) || (!this._verifyParams(posting))) {
             throw InvalidParameterError;
         }
 
-        // Insert
-        const result = await NoShow.insert(posting);
-        return { id: result.identifiers[0].id }
+        try {
+            const result = await NoShow.insert(posting);
+            return { id: result.identifiers[0].id }
+        } catch (err) {
+            throw QueryFailedError;
+        }
     }
 
-    updatePosting() {}
+    async updatePosting(posting: Partial<NoShow>) {
+        const postingToUpdate = await NoShow.findOne({ id:posting.id, writer:posting.writer });
+        if (!postingToUpdate) {
+            throw InstanceNotFoundError;
+        }
+        
+        const updatedPosting = { ...postingToUpdate, ...posting } as NoShow;
+        if (!this._verifyParams(updatedPosting)) {
+            throw InvalidParameterError;
+        }
+
+        try {
+            const updateResult = await NoShow.save(updatedPosting);
+            return { id: updateResult.id };
+        } catch(err) {
+            throw QueryFailedError;
+        }
+    }
+
     async deletePosting(writer: string, postingID: number) {
         try {
             await NoShow.delete({ id:postingID, writer });
             return true
         } catch(err) {
-            console.error(err);
-            return false;
+            throw QueryFailedError;
         }
     }
 
-    generatePostID() {
+    async getPosting(writer: string, postingID: number) {
+        const posting = await NoShow.findOne({ id:postingID, writer });
+        if (!posting) {
+            throw InstanceNotFoundError;
+        }
+        
+        return posting;
+    }
 
+    async getAllPosting(writer: string, from: number, to: number) {
+        try {
+            const postings = await NoShow.find({
+                where: { writer },
+                order: { id: "ASC" },
+                skip: from,
+                take: to-from,
+            });
+            return postings;
+        } catch(err) {
+            throw QueryFailedError;
+        }
+    }
+
+    private _verifyParams(posting: NoShow) {
+        if ((posting.salePrice && 
+                ((Number(posting.salePrice) < 0) || 
+                (Number(posting.salePrice) >= Number(posting.costPrice)))) ||
+            (new Date(posting.to) <= new Date()) || 
+            (posting.from >= posting.to) ||
+            (Number(posting.minPeople) < 1) ||
+            (Number(posting.minPeople) > Number(posting.maxPeople))) {
+                return false;
+        }
+
+        return true;
     }
 }

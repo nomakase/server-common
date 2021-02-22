@@ -14,18 +14,30 @@ export default function addErrorHandlers(app: express.Application) {
     });
   });
 
+  // Handle unexpected error
+  app.use((err: Error, _req: express.Request, _res: express.Response, next: express.NextFunction) => {
+    if (!(err instanceof CustomError)){
+      // TODO: Write to log file
+      console.error("Unhandled Error occured.");
+      console.error(err);
+      next(new Error());
+    } else {
+      next(err);
+    }
+  })
+
   app.use(
     (
-      { httpStatus, type, name, message, errorCode }: CustomError,
+      { httpStatus, type, message, errorCode }: CustomError,
       req: express.Request,
       res: ErrorResponse,
       _n: express.NextFunction
     ) => {
-      console.log(`${httpStatus||500} ${req.originalUrl}\n${name ?? type}: ${message}`);
+      console.log(`${httpStatus||500} ${req.originalUrl}\n${type || "Error"}: ${message || "Unhandled Error occurred"}`);
       res.status(httpStatus || 500).json({
-        type: name ?? "Internal Server Error",
-        status: httpStatus ?? 500,
-        message: message ?? "The server has been deserted for a while.",
+        type: type ?? "Internal Server Error",
+        status: httpStatus || 500,
+        message: message || "The server has been deserted for a while.",
         errorCode: errorCode
       });
     }
