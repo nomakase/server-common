@@ -1,28 +1,10 @@
 import express from "express";
-import multer, { diskStorage } from "multer";
-import fs from "fs";
-import path from "path";
 import { Restaurant } from "../entities/Restaurant";
 import { RestaurantPhoto } from "../entities/RestaurantPhoto";
 import { MissingParameterError, InvalidPhoneNumberError, DuplicatedPhoneNumberError, InstanceNotFoundError } from "../errors";
+import { upload } from "../utils/upload"
 
 const router = express.Router();
-const storage = diskStorage({
-  destination: (_req, _file, cb) => {
-    const destination = path.join(__dirname, "../public/images");
-
-    if (!fs.existsSync(destination)) {
-      fs.mkdirSync(destination, { recursive: true });
-    }
-    cb(null, destination);
-  },
-  filename: (_, file, cb) => {
-    const { ext, name } = path.parse(file.originalname);
-    const fileName = name + "_" + Date.now() + ext;
-    cb(null, fileName);
-  }
-})
-const upload = multer({ storage });
 
 router.post("/", upload.array("photos", 5), async (req, _res, next) => {
   const { name, phoneNumber, address, openningHour, breakTime, description }: Partial<Restaurant> = req.body;
