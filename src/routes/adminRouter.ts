@@ -3,11 +3,13 @@ import { Admin } from "../entities/Admin";
 import JWT from "../auth/JWT";
 import { InstanceNotFoundError, MissingParameterError, NoMatchedUserError } from "../errors";
 import hash from "../utils/hash";
-import { BlackList } from "../entities/BlackList";
+import { Blacklist } from "../entities/Blacklist";
 import { JwtPayload, AccessTokenPayload } from "@custom-types/jsonwebtoken";
 import { Restaurant } from "../entities/Restaurant";
 import { RestaurantPhoto } from "../entities/RestaurantPhoto";
 import authenticator from "../middlewares/authenticator";
+import { TokenReason } from "../tokenStore";
+import { Whitelist } from "../entities/Whitelist";
 
 const router = express.Router();
 
@@ -30,9 +32,9 @@ router.post("/signIn", async (req, res, next) => {
         const accessToken = JWT.signAccess({ email: id });
         const tokenID = (JWT.decodeAccess(accessToken) as JwtPayload<AccessTokenPayload>).jti;
         
-        // TODO: Refactor
-        // Use blacklist as a whitelist only for admin token.
-        await BlackList.addAdminToken(tokenID);
+        // Admin token cannot be used for normal user.
+        await Blacklist.addAccessToken(tokenID, TokenReason.REASON_ADMIN, Blacklist.MAX_REMAINING);
+        await Whitelist.addAdminToken(tokenID);
 
         res.json({ accessToken });
     } catch (err) {
@@ -47,7 +49,7 @@ router.post("/signOut", async (req, res, next) => {
 
         // TODO: Refactor
         // Use blacklist as a whitelist only for admin token.
-        await BlackList.removeAdminToken(tokenID);
+        await Whitelist.removeAdminToken(tokenID);
 
         res.json({ result:true });
     } catch(err) {

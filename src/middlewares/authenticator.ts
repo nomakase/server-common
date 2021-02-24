@@ -1,8 +1,10 @@
 import { Request, Response, NextFunction } from "express";
 import JWT from "../auth/JWT";
 import { NoTokenError, InvalidAccessTokenError, AnotherDeviceDetectedError } from "../errors";
-import { BlackList } from "../entities/BlackList";
+import { Blacklist } from "../entities/Blacklist";
 import { AuthorizedRequest } from "@custom-types/express";
+import { TokenReason } from "../tokenStore";
+import { Whitelist } from "../entities/Whitelist";
 
 /**
  * @description verifies access token given from the request 
@@ -17,24 +19,20 @@ async function user(
 ) {
   const accessToken = req.headers.authorization
   if (!accessToken) {
-    next(NoTokenError);
-    return;
+    return next(NoTokenError);
   }
   
   const decoded = JWT.verifyAccess(accessToken);
   if (!decoded) {
-    next(InvalidAccessTokenError);
-    return;
+    return next(InvalidAccessTokenError);
   }
   
-  const reason = await BlackList.findAccessToken(decoded.jti)
+  const reason = await Blacklist.findAccessToken(decoded.jti)
   if (reason) {
-    if (reason == BlackList.REASON_NEW_SIGNIN) {
-      next(AnotherDeviceDetectedError);
-      return;
+    if (reason == TokenReason.REASON_NEW_SIGNIN) {
+      return next(AnotherDeviceDetectedError);
     } else {
-      next(InvalidAccessTokenError);
-      return;
+      return next(InvalidAccessTokenError);
     }
   }
   
@@ -57,7 +55,7 @@ async function admin(
     return next(InvalidAccessTokenError);
   }
 
-  const isValid = BlackList.findAdminToken(decoded.jti);
+  const isValid = Whitelist.findAdminToken(decoded.jti);
   if (!isValid) {
     return next(InvalidAccessTokenError);
   }

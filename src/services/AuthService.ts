@@ -4,8 +4,9 @@ import { Manager } from "../entities/Manager";
 import { InvalidOAuthTokenError, OAuthPermissionError, 
   InvalidRefreshTokenError, NoMatchedUserError, 
   AnotherDeviceDetectedError, InvalidAccessTokenError } from "../errors";
-import { BlackList } from "../entities/BlackList";
+import { Blacklist } from "../entities/Blacklist";
 import { AccessTokenPayload, JwtPayload, RefreshTokenPayload } from "@custom-types/jsonwebtoken";
+import { TokenReason } from "../tokenStore";
 
 // TODO: Need to refactor for reusability.(divide)
 
@@ -25,7 +26,7 @@ export default class AuthService {
     
     const userToSignIn = await this._getUser(email);
     if (userToSignIn.accessTokenID) {
-      await this._revokeAccessToken(userToSignIn.accessTokenID, BlackList.REASON_NEW_SIGNIN);
+      await this._revokeAccessToken(userToSignIn.accessTokenID, TokenReason.REASON_NEW_SIGNIN);
     }
     
     const { accessToken, refreshToken } = JWT.signTokenPair(email, deviceID);
@@ -45,7 +46,7 @@ export default class AuthService {
       throw InvalidAccessTokenError;
     }
     
-    // Verify refresh Token. And this should be prior to verifying jti.
+    // Verify refresh Token. This should be prior to verifying jti.
     const decodedRefreshToken = JWT.verifyRefresh(_refreshToken, _accessToken, deviceID);
     if (!decodedRefreshToken) {
       throw InvalidRefreshTokenError;
@@ -61,7 +62,7 @@ export default class AuthService {
     
     if (userToSignIn.accessTokenID) {
       const remaining = JWT.getAccessTokenRemainingTime(_accessToken);
-      await this._revokeAccessToken(userToSignIn.accessTokenID, BlackList.REASON_REFRESH, remaining);
+      await this._revokeAccessToken(userToSignIn.accessTokenID, TokenReason.REASON_REFRESH, remaining);
     }
     
     const { accessToken, refreshToken } = JWT.signTokenPair(decodedUserInfo.email, deviceID);
@@ -75,7 +76,7 @@ export default class AuthService {
 
     const accessTokenID = decodeAccess.jti;
     const remaining = JWT.getAccessTokenRemainingTime(accessToken);
-    await this._revokeAccessToken(accessTokenID, BlackList.REASON_SIGNOUT, remaining);
+    await this._revokeAccessToken(accessTokenID, TokenReason.REASON_SIGNOUT, remaining);
     
     const decodedUserInfo = decodeAccess.payload;
     await this._updateTokenInfo(decodedUserInfo.email, null, null);
@@ -105,9 +106,9 @@ export default class AuthService {
     return user;
   }
   
-  private async _revokeAccessToken(accessTokenID: string, reason: string, tokenRemaining: number = BlackList.MAX_REMAINING) {
+  private async _revokeAccessToken(accessTokenID: string, reason: string, tokenRemaining: number = Blacklist.MAX_REMAINING) {
     if (tokenRemaining > 0) {
-      await BlackList.addAccessToken(accessTokenID, reason, tokenRemaining);
+      await Blacklist.addAccessToken(accessTokenID, reason, tokenRemaining);
     }
   }
 }
