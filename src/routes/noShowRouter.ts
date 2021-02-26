@@ -23,9 +23,7 @@ router.get("/all", async (req, res, next) => {
             throw MissingParameterError;
         }
         
-        const postingService = new PostingService();
-        const result =  await postingService.getAllPosting(posting.writer, from, to);
-        
+        const result =  await PostingService.getAllPosting(posting.writer, from, to);
         res.json({ result });
     } catch (err) {
         next(err);
@@ -41,9 +39,7 @@ router.get("/:postingID", async (req, res, next) => {
             throw MissingParameterError;
         }
         
-        const postingService = new PostingService();
-        const result =  await postingService.getPosting(posting.writer, posting.id);
-        
+        const result =  await PostingService.getPosting(posting.writer, posting.id);
         res.json({ result });
     } catch (err) {
         next(err);
@@ -58,9 +54,7 @@ router.post("/", async (req, res, next) => {
             throw MissingParameterError;
         }
 
-        const postingService = new PostingService();
-        const result = await postingService.createPosting(posting);
-
+        const result = await PostingService.createPosting(posting);
         res.json({ postingID: result.id });
     } catch (err) {
         next(err);
@@ -74,9 +68,7 @@ router.put("/", async (req, res, next) => {
             throw MissingParameterError;
         }
 
-        const postingService = new PostingService();
-        const result = await postingService.updatePosting(posting);
-        
+        const result = await PostingService.updatePosting(posting);        
         res.json({ postingID: result.id });
     } catch (err) {
         next(err);
@@ -87,13 +79,10 @@ router.delete("/", async (req: AuthorizedRequest, res, next) => {
     try {
         const posting: Partial<NoShow> = req.body;
         if (!(posting.id && posting.writer)){
-            throw new Error("UUUU");
-            //throw MissingParameterError;
+            throw MissingParameterError;
         }
         
-        const postingService = new PostingService();
-        const result =  await postingService.deletePosting(posting.writer, posting.id);
-        
+        const result =  await PostingService.deletePosting(posting.writer, posting.id);
         res.json({ result });
     } catch (err) {
         next(err);

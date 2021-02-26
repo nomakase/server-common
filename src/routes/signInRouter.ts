@@ -22,8 +22,8 @@ router.post(
         throw MissingParameterError;
       }
 
-      const auth = new AuthService(authServer.create());
-      const signedInUser = await auth.signIn(
+      const signedInUser = await AuthService.signIn(
+        authServer.create(),
         oauthToken,
         deviceID
       );
@@ -47,15 +47,12 @@ router.post("/signInAuto", async (req, res: SignInResponse, next) => {
   const refreshToken = req.body.refreshToken;
   const deviceID = req.body.deviceID;
 
-  // No need OAuth service.
-  const auth = new AuthService();
-
   try {
     if (!(accessToken && refreshToken && deviceID)) {
       throw MissingParameterError;
     }
 
-    const signedInUser = await auth.signInAuto(
+    const signedInUser = await AuthService.signInAuto(
       refreshToken,
       accessToken,
       deviceID

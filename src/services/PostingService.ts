@@ -3,7 +3,7 @@ import { NoShow } from "../entities/NoShow";
 
 export default class PostingService{
 
-    async createPosting(posting: NoShow) {
+    static async createPosting(posting: NoShow) {
         if ((posting.id) || (!this._verifyParams(posting))) {
             throw InvalidParameterError;
         }
@@ -16,7 +16,7 @@ export default class PostingService{
         }
     }
 
-    async updatePosting(posting: Partial<NoShow>) {
+    static async updatePosting(posting: Partial<NoShow>) {
         const postingToUpdate = await NoShow.findOne({ id:posting.id, writer:posting.writer });
         if (!postingToUpdate) {
             throw InstanceNotFoundError;
@@ -35,7 +35,7 @@ export default class PostingService{
         }
     }
 
-    async deletePosting(writer: string, postingID: number) {
+    static async deletePosting(writer: string, postingID: number) {
         try {
             await NoShow.delete({ id:postingID, writer });
             return true
@@ -44,7 +44,7 @@ export default class PostingService{
         }
     }
 
-    async getPosting(writer: string, postingID: number) {
+    static async getPosting(writer: string, postingID: number) {
         const posting = await NoShow.findOne({ id:postingID, writer });
         if (!posting) {
             throw InstanceNotFoundError;
@@ -53,7 +53,7 @@ export default class PostingService{
         return posting;
     }
 
-    async getAllPosting(writer: string, from: number, to: number) {
+    static async getAllPosting(writer: string, from: number, to: number) {
         try {
             const postings = await NoShow.find({
                 where: { writer },
@@ -67,7 +67,7 @@ export default class PostingService{
         }
     }
 
-    private _verifyParams(posting: NoShow) {
+    private static _verifyParams(posting: NoShow) {
         if ((posting.salePrice && 
                 ((Number(posting.salePrice) < 0) || 
                 (Number(posting.salePrice) >= Number(posting.costPrice)))) ||

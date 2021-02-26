@@ -11,15 +11,14 @@ import { TokenReason } from "../tokenStore";
 // TODO: Need to refactor for reusability.(divide)
 
 export default class AuthService {
-  constructor(private oauth?: OAuth) { }
-
-  async signIn(tokenOrAccessCode: string, deviceID: string) {
-    if (!(await this.oauth?.authenticate(tokenOrAccessCode))) {
+  
+  static async signIn(authServer: OAuth, tokenOrAccessCode: string, deviceID: string) {
+    if (!(await authServer.authenticate(tokenOrAccessCode))) {
       throw InvalidOAuthTokenError;
     }
 
     // In case user disallows to access email info.
-    const email = this.oauth?.getUserInfo();
+    const email = authServer.getUserInfo();
     if (!email) {
       throw OAuthPermissionError;
     }
@@ -38,7 +37,7 @@ export default class AuthService {
   /**
    * This function enables the user to auto-signin with refresh token saved in the device.
    **/
-  async signInAuto(_refreshToken: string, _accessToken: string, deviceID: string) {
+  static async signInAuto(_refreshToken: string, _accessToken: string, deviceID: string) {
 
     // Check access token can be decoded.
     const decodedUserInfo = JWT.decodeAccess(_accessToken, true) as AccessTokenPayload;
@@ -71,7 +70,7 @@ export default class AuthService {
     return { accessToken, refreshToken, isSubmitted, isApproved };
   }
   
-  async signOut(accessToken: string) {
+  static async signOut(accessToken: string) {
     const decodeAccess = JWT.decodeAccess(accessToken) as JwtPayload<AccessTokenPayload>;
 
     const accessTokenID = decodeAccess.jti;
@@ -84,7 +83,7 @@ export default class AuthService {
     return true;
   }
 
-  private async _updateTokenInfo(user: string | Manager, accessToken: string | null, refreshToken: string | null) {
+  private static async _updateTokenInfo(user: string | Manager, accessToken: string | null, refreshToken: string | null) {
     const userToSignIn = 
       (typeof user === "string") ? await this._getUser(user) : user;
     
@@ -98,7 +97,7 @@ export default class AuthService {
     return userToSignIn;
   }
   
-  private async _getUser(email: string) {
+  private static async _getUser(email: string) {
     const user = await Manager.findOneByEmail(email);
     if (!user) {
       throw NoMatchedUserError;
@@ -106,7 +105,7 @@ export default class AuthService {
     return user;
   }
   
-  private async _revokeAccessToken(accessTokenID: string, reason: string, tokenRemaining: number = Blacklist.MAX_REMAINING) {
+  private static async _revokeAccessToken(accessTokenID: string, reason: string, tokenRemaining: number = Blacklist.MAX_REMAINING) {
     if (tokenRemaining > 0) {
       await Blacklist.addAccessToken(accessTokenID, reason, tokenRemaining);
     }

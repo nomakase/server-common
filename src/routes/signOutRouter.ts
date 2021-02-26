@@ -9,8 +9,7 @@ router.use(authenticator.user);
 router.post("/", async (req, res, next) => {
     try {
         const accessToken = req.headers.authorization!;
-        const authService = new AuthService();
-        const result = authService.signOut(accessToken);
+        const result = AuthService.signOut(accessToken);
         
         res.json({ result });
     } catch (err) {
