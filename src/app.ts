@@ -9,6 +9,7 @@ import signOutRouter from "./routes/signOutRouter";
 import noShowRouter from "./routes/noShowRouter";
 import adminRouter from "./routes/adminRouter";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 
 const app = express();
 
@@ -17,6 +18,7 @@ app.use(express.json());
 // app.use(express.urlencoded({ extended: false }));
 
 app.use(cors());
+app.use(cookieParser());
 
 app.use("/", (req, _res, next) => {
   console.log(req.originalUrl);
