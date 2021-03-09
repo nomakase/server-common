@@ -1,13 +1,5 @@
-import {
-  BaseEntity,
-  Column,
-  Entity,
-  OneToMany,
-  PrimaryGeneratedColumn,
-} from "typeorm";
-import { NoShowPhoto } from "./NoShowPhoto";
+import { BaseEntity, Column, PrimaryGeneratedColumn } from "typeorm";
 
-@Entity()
 export class NoShow extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
@@ -35,7 +27,4 @@ export class NoShow extends BaseEntity {
 
   @Column({ nullable: true })
   description: string;
-
-  @OneToMany(() => NoShowPhoto, (photos) => photos.noShow)
-  photos: NoShowPhoto[];
 }

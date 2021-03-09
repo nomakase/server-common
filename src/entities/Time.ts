@@ -2,8 +2,8 @@ import { Column } from "typeorm";
 
 export class Time {
   @Column({ nullable: true })
-  start: string
+  start: string;
 
   @Column({ nullable: true })
-  end: string
+  end: string;
 }
