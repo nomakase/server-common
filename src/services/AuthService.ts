@@ -7,6 +7,7 @@ import { InvalidOAuthTokenError, OAuthPermissionError,
 import { Blacklist } from "../entities/Blacklist";
 import { AccessTokenPayload, JwtPayload, RefreshTokenPayload } from "@custom-types/jsonwebtoken";
 import { TokenReason } from "../tokenStore";
+import hash from "../utils/hash";
 
 // TODO: Need to refactor for reusability.(divide)
 
@@ -81,6 +82,23 @@ export default class AuthService {
     await this._updateTokenInfo(decodedUserInfo.email, null, null);
     
     return true;
+  }
+
+  static async unregisterUser(email: string){
+    const userToUnregister = await this._getUser(email);
+    userToUnregister.remove();
+
+    return true;
+  }
+
+  static generateUID(...params: any[]) {
+    const delimiter = ":";   
+    let uid = "";
+    for (const p of params) {
+      uid += p.toString() + delimiter;
+    }
+    
+    return uid ? hash(uid.substring(0, uid.length-1)) : null;
   }
 
   private static async _updateTokenInfo(user: string | Manager, accessToken: string | null, refreshToken: string | null) {
