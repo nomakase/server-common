@@ -1,5 +1,6 @@
 import { AuthorizedRequest } from "@custom-types/express";
 import express from "express";
+import { ActiveNoShow } from "../entities/ActiveNoShow";
 import { NoShow } from "../entities/NoShow";
 import { MissingParameterError } from "../errors";
 import PostingService from "../services/PostingService";
@@ -13,7 +14,7 @@ router.use("/", (req: AuthorizedRequest, _res, next) => {
     next();
 })
 
-router.get("/all", async (req, res, next) => {
+router.get("/active/all", async (req, res, next) => {
     try {
         const posting: Partial<NoShow> = req.body;
         const from = Number(req.query.from);
@@ -23,14 +24,14 @@ router.get("/all", async (req, res, next) => {
             throw MissingParameterError;
         }
         
-        const result =  await PostingService.getAllPosting(posting.writer, from, to);
+        const result =  await PostingService.getAllActivePosting(posting.writer, from, to);
         res.json({ result });
     } catch (err) {
         next(err);
     }
 })
 
-router.get("/:postingID", async (req, res, next) => {
+router.get("/active/:postingID", async (req, res, next) => {
     try {
         let posting: Partial<NoShow> = req.body;
         posting.id = Number(req.params.postingID);
@@ -39,50 +40,50 @@ router.get("/:postingID", async (req, res, next) => {
             throw MissingParameterError;
         }
         
-        const result =  await PostingService.getPosting(posting.writer, posting.id);
+        const result =  await PostingService.getActivePosting(posting.writer, posting.id);
         res.json({ result });
     } catch (err) {
         next(err);
     }
 })
 
-router.post("/", async (req, res, next) => {
+router.post("/active", async (req, res, next) => {
     try {
-        const posting: NoShow = req.body;
+        const posting: ActiveNoShow = req.body;
         console.log(posting);
         if (!(posting.costPrice && posting.from && posting.to && posting.maxPeople)){
             throw MissingParameterError;
         }
 
-        const result = await PostingService.createPosting(posting);
+        const result = await PostingService.createActivePosting(posting);
         res.json({ postingID: result.id });
     } catch (err) {
         next(err);
     }
 });
 
-router.put("/", async (req, res, next) => {
+router.put("/active", async (req, res, next) => {
     try {
-        const posting: Partial<NoShow> = req.body;
+        const posting: Partial<ActiveNoShow> = req.body;
         if (!(posting.id)){
             throw MissingParameterError;
         }
 
-        const result = await PostingService.updatePosting(posting);        
+        const result = await PostingService.updateActivePosting(posting);        
         res.json({ postingID: result.id });
     } catch (err) {
         next(err);
     }
 });
 
-router.delete("/", async (req: AuthorizedRequest, res, next) => {
+router.delete("/active", async (req, res, next) => {
     try {
         const posting: Partial<NoShow> = req.body;
         if (!(posting.id && posting.writer)){
             throw MissingParameterError;
         }
         
-        const result =  await PostingService.deletePosting(posting.writer, posting.id);
+        const result =  await PostingService.deleteActivePosting(posting.writer, posting.id);
         res.json({ result });
     } catch (err) {
         next(err);
