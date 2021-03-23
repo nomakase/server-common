@@ -1,5 +1,6 @@
 import { InstanceNotFoundError, InvalidParameterError, QueryFailedError } from "../errors";
 import { ActiveNoShow } from "../entities/ActiveNoShow";
+import { InactiveNoShow } from "../entities/InactiveNoShow";
 
 
 export default class PostingService{
@@ -54,9 +55,37 @@ export default class PostingService{
         return posting;
     }
 
-    static async getAllActivePosting(writer: string, from: number, to: number) {
+    static async getAllActivePosting(writer: string, from: number | undefined, to: number | undefined) {
         try {
+            let take = undefined;
+            if ((from !== undefined) && (to !== undefined)) {
+                take = to-from;
+            }
+
             const postings = await ActiveNoShow.find({
+                where: { writer },
+                order: { id: "ASC" },
+                skip: from,
+                take: take,
+            });
+            return postings;
+        } catch(err) {
+            throw QueryFailedError;
+        }
+    }
+
+    static async getInactivePosting(writer: string, postingID: number) {
+        const posting = await InactiveNoShow.findOne({ id:postingID, writer });
+        if (!posting) {
+            throw InstanceNotFoundError;
+        }
+        
+        return posting;
+    }
+
+    static async getAllInactivePosting(writer: string, from: number, to: number) {
+        try {
+            const postings = await InactiveNoShow.find({
                 where: { writer },
                 order: { id: "ASC" },
                 skip: from,
@@ -66,6 +95,24 @@ export default class PostingService{
         } catch(err) {
             throw QueryFailedError;
         }
+    }
+
+    static async deleteInactivePosting(writer: string, postingID: number) {
+        try {
+            await InactiveNoShow.delete({ id:postingID, writer });
+            return true;
+        } catch(err) {
+            throw QueryFailedError;
+        }
+    }
+
+    static async convertToInactive(active: ActiveNoShow, reason: 0 | 1 = InactiveNoShow.REASON_EXPIRED){
+        await active.remove()
+        const result = await InactiveNoShow.insert({ 
+            ...active,
+            reason: reason
+        });
+        return { id: result.identifiers[0].id }
     }
 
     private static _verifyParams(posting: ActiveNoShow) {

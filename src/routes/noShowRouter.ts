@@ -50,7 +50,6 @@ router.get("/active/:postingID", async (req, res, next) => {
 router.post("/active", async (req, res, next) => {
     try {
         const posting: ActiveNoShow = req.body;
-        console.log(posting);
         if (!(posting.costPrice && posting.from && posting.to && posting.maxPeople)){
             throw MissingParameterError;
         }
@@ -89,5 +88,56 @@ router.delete("/active", async (req, res, next) => {
         next(err);
     }
 });
+
+router.get("/inactive/all", async (req, res, next) => {
+    try {
+        const posting: Partial<NoShow> = req.body;
+        const from = Number(req.query.from);
+        const to = Number(req.query.to);
+        
+        if (!(posting.writer && (from >= 0) && (to >= 0))){
+            throw MissingParameterError;
+        }
+
+        if (from == 0) {
+            const actives =  await PostingService.getAllActivePosting(posting.writer, undefined, undefined);
+            await Promise.all(actives.filter((actives) => new Date(actives.to) <= new Date())
+            .map(async (active) => await PostingService.convertToInactive(active)));
+        }
+
+        const result =  await PostingService.getAllInactivePosting(posting.writer, from, to);
+        res.json({ result });
+    } catch (err) {
+        next(err);
+    }
+})
+
+router.get("/inactive/:postingID", async (req, res, next) => {
+    try {
+        const posting: Partial<NoShow> = req.body;
+        if (!(posting.id && posting.writer)) {
+            throw MissingParameterError;
+        }
+
+        const result = await PostingService.getInactivePosting(posting.writer, posting.id);
+        res.json({ result });
+    } catch (err) {
+        next(err);
+    }
+})
+
+router.delete("/inactive", async (req, res, next) => {
+    try {
+        const posting: Partial<NoShow> = req.body;
+        if (!(posting.id && posting.writer)){
+            throw MissingParameterError;
+        }
+
+        const result = await PostingService.deleteInactivePosting(posting.writer, posting.id);
+        res.json({ result });         
+    } catch (err) {
+        next(err);
+    }
+})
 
 export default router;
