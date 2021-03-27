@@ -31,7 +31,7 @@ router.post("/signIn", async (req, res, next) => {
 
         const accessToken = JWT.signAccess({ email: id });
         const tokenID = (JWT.decodeAccess(accessToken) as JwtPayload<AccessTokenPayload>).jti;
-        
+
         // Admin token cannot be used for normal user.
         await Blacklist.addAccessToken(tokenID, TokenReason.REASON_ADMIN, Blacklist.MAX_REMAINING);
         await Whitelist.addAdminToken(tokenID);
@@ -51,13 +51,12 @@ router.post("/signOut", async (req, res, next) => {
         // Use blacklist as a whitelist only for admin token.
         await Whitelist.removeAdminToken(tokenID);
 
-        res.json({ result:true });
-    } catch(err) {
+        res.json({ result: true });
+    } catch (err) {
         next(err);
     }
 })
 
-// TODO: 토큰을 검증해야합니다.
 router.post("/verification", async (req, res, next) => {
     const { id, status } = req.body;
     console.log(id, status);
@@ -83,9 +82,8 @@ router.post("/verification", async (req, res, next) => {
     res.send({ id });
 })
 
-// TODO: 토큰을 검증해야합니다.
 router.get("/verification", async (_req, res) => {
-    const restaurants = await Restaurant.find({ where: { verfication: 0 } });
+    const restaurants = await Restaurant.find({ verfication: 0 });
     const restaurantsWithPhotos = await Promise.all(restaurants.map(async (restaurant) => {
         const photos = await RestaurantPhoto.find({
             relations: ["restaurant"],
