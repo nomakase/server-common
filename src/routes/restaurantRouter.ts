@@ -2,7 +2,7 @@ import express from "express";
 import { AuthorizedRequest } from "@custom-types/express";
 import { Restaurant } from "../entities/Restaurant";
 import { RestaurantPhoto } from "../entities/RestaurantPhoto";
-import { MissingParameterError, InvalidPhoneNumberError, DuplicatedPhoneNumberError, InstanceNotFoundError} from "../errors";
+import { MissingParameterError, InvalidPhoneNumberError, DuplicatedPhoneNumberError, InstanceNotFoundError, NoMatchedUserError} from "../errors";
 import { upload } from "../utils/upload"
 import AuthService from "../services/AuthService";
 import { Manager } from "../entities/Manager";
