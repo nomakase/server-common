@@ -24,7 +24,7 @@ export default class AuthService {
       throw OAuthPermissionError;
     }
     
-    const userToSignIn = await this._getUser(email);
+    const userToSignIn = await this.getUser(email);
     if (userToSignIn.accessTokenID) {
       await this._revokeAccessToken(userToSignIn.accessTokenID, TokenReason.REASON_NEW_SIGNIN);
     }
@@ -52,7 +52,7 @@ export default class AuthService {
       throw InvalidRefreshTokenError;
     }
     
-    const userToSignIn = await this._getUser(decodedUserInfo.email)
+    const userToSignIn = await this.getUser(decodedUserInfo.email)
     
     // Verify using jti claim.
     const jti = decodedRefreshToken.jti;
@@ -85,7 +85,7 @@ export default class AuthService {
   }
 
   static async unregisterUser(email: string){
-    const userToUnregister = await this._getUser(email);
+    const userToUnregister = await this.getUser(email);
     userToUnregister.remove();
 
     return true;
@@ -103,7 +103,7 @@ export default class AuthService {
 
   private static async _updateTokenInfo(user: string | Manager, accessToken: string | null, refreshToken: string | null) {
     const userToSignIn = 
-      (typeof user === "string") ? await this._getUser(user) : user;
+      (typeof user === "string") ? await this.getUser(user) : user;
     
     const accessTokenID = accessToken ? (JWT.decodeAccess(accessToken) as JwtPayload<AccessTokenPayload>).jti : null;
     const refreshTokenID = refreshToken ? (JWT.decodeRefresh(refreshToken) as JwtPayload<RefreshTokenPayload>).jti : null;
@@ -115,7 +115,7 @@ export default class AuthService {
     return userToSignIn;
   }
   
-  private static async _getUser(email: string) {
+  static async getUser(email: string) {
     const user = await Manager.findOneByEmail(email);
     if (!user) {
       throw NoMatchedUserError;
