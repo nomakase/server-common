@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column, BaseEntity } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, BaseEntity, OneToMany } from "typeorm";
+import { Restaurant } from "./Restaurant";
 
 @Entity()
 export class Manager extends BaseEntity {
@@ -19,6 +20,9 @@ export class Manager extends BaseEntity {
 
   @Column({ default: false })
   isApproved: boolean;
+
+  @OneToMany(() => Restaurant, restaurant => restaurant.manager)
+  restaurants: Restaurant[];
 
   static findOneByEmail(email: string) {
     return this.findOne({ email });

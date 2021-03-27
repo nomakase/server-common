@@ -2,9 +2,11 @@ import {
   BaseEntity,
   Column,
   Entity,
+  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
 } from "typeorm";
+import { Manager } from "./Manager";
 import { RestaurantPhoto } from "./RestaurantPhoto";
 import { Time } from "./Time";
 
@@ -36,4 +38,7 @@ export class Restaurant extends BaseEntity {
 
   @Column({ type: "int", default: 0 })
   verfication: number;
+
+  @ManyToOne(() => Manager, (manager) => manager.restaurants)
+  manager: Manager;
 }
