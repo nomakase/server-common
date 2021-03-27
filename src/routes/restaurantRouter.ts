@@ -1,13 +1,25 @@
 import express from "express";
+import { AuthorizedRequest } from "@custom-types/express";
 import { Restaurant } from "../entities/Restaurant";
 import { RestaurantPhoto } from "../entities/RestaurantPhoto";
-import { MissingParameterError, InvalidPhoneNumberError, DuplicatedPhoneNumberError, InstanceNotFoundError } from "../errors";
+import { MissingParameterError, InvalidPhoneNumberError, DuplicatedPhoneNumberError, InstanceNotFoundError, NoMatchedUserError } from "../errors";
 import { upload } from "../utils/upload"
+import AuthService from "../services/AuthService";
 
 const router = express.Router();
 
-router.post("/", upload.array("photos", 5), async (req, _res, next) => {
+router.get("/", async (req: AuthorizedRequest, res) => {
+  const email = req.Identifier!.email;
+  const user = await AuthService.getUser(email);
+
+  res.json(user.restaurants);
+})
+
+router.post("/", upload.array("photos", 5), async (req: AuthorizedRequest, _res, next) => {
   const { name, phoneNumber, address, openningHour, breakTime, description }: Partial<Restaurant> = req.body;
+  const email = req.Identifier!.email;
+  const user = await AuthService.getUser(email);
+
   if (!(name && phoneNumber && address)) {
     return next(MissingParameterError);
   }
@@ -26,6 +38,7 @@ router.post("/", upload.array("photos", 5), async (req, _res, next) => {
       openningHour,
       breakTime,
       description,
+      manager: user,
     })
     restaurantId = insertResult.identifiers[0].id;
   } catch (err) {
