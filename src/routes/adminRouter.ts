@@ -57,7 +57,6 @@ router.post("/signOut", async (req, res, next) => {
     }
 })
 
-// TODO: 토큰을 검증해야합니다.
 router.post("/verification", async (req, res, next) => {
     const { id, status } = req.body;
     console.log(id, status);
@@ -83,7 +82,6 @@ router.post("/verification", async (req, res, next) => {
     res.send({ id });
 })
 
-// TODO: 토큰을 검증해야합니다.
 router.get("/verification", async (_req, res) => {
     const restaurants = await Restaurant.find({ where: { verfication: 0 } });
     const restaurantsWithPhotos = await Promise.all(restaurants.map(async (restaurant) => {
