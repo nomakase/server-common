@@ -5,12 +5,14 @@ import { RestaurantPhoto } from "../entities/RestaurantPhoto";
 import { MissingParameterError, InvalidPhoneNumberError, DuplicatedPhoneNumberError, InstanceNotFoundError, NoMatchedUserError } from "../errors";
 import { upload } from "../utils/upload"
 import AuthService from "../services/AuthService";
+import { Manager } from "../entities/Manager";
 
 const router = express.Router();
 
-router.get("/", async (req: AuthorizedRequest, res) => {
+router.get("/", async (req: AuthorizedRequest, res, next) => {
   const email = req.Identifier!.email;
-  const user = await AuthService.getUser(email);
+  const user = await Manager.findOne({ email }, { relations: ["restaurants"] });
+  if (!user) return next(NoMatchedUserError);
 
   res.json(user.restaurants);
 })
@@ -55,7 +57,7 @@ router.post("/", upload.array("photos", 5), async (req: AuthorizedRequest, _res,
 })
 
 router.post("/", async (req, res, next) => {
-  if (req.files.length === 0) return;
+  if (!req.files || req.files.length === 0) return;
 
   const { restaurantId } = req.body;
 
