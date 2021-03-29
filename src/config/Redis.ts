@@ -3,6 +3,8 @@ import { promisify } from "util";
 
 export default class Redis {
   private static readonly redisConfig = {
+    host: process.env.DB_HOST,
+    port: Number(process.env.REDIS_PORT),
     password: process.env.REDIS_PASSWORD,
   };
 
