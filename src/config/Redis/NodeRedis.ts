@@ -22,8 +22,10 @@ export default class NodeRedis extends Redis<nodeRedis.RedisClient> {
       password: process.env.REDIS_PASSWORD,
       socket_keepalive: true,
       retry_strategy: (options) => {
-        console.log("Redis connection is lost with somehow reason." + options.error.code);
-        console.log("code: " + options.error.code);
+        if (options.error) {
+          console.log("Redis connection is lost with somehow reason.");
+          console.log("code: " + options.error.code);
+        }
         console.log("attempt: " + options.attempt);
         console.log("total retry time(ms): " + options.total_retry_time);
   
