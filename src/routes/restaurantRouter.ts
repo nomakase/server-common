@@ -70,7 +70,7 @@ router.post("/", async (req, res, next) => {
   }
 
   const photos = (req.files as Express.Multer.File[]).map((file) => {
-    const filePath = `${process.env.DB_HOST}:${process.env.PORT}/images/${file.filename}`
+    const filePath = `${process.env.MAIN_HOST}:${process.env.PORT}/images/${file.filename}`
     const photo = new RestaurantPhoto();
     photo.filePath = filePath;
     photo.restaurant = restaurant!;
