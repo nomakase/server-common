@@ -1,5 +1,6 @@
 import { AuthorizedRequest } from "@custom-types/express";
 import express from "express";
+import { InactiveNoShow } from "../entities/InactiveNoShow";
 import { ActiveNoShow } from "../entities/ActiveNoShow";
 import { NoShow } from "../entities/NoShow";
 import { MissingParameterError } from "../errors";
@@ -50,6 +51,24 @@ router.get("/active/:postingID", async (req, res, next) => {
         next(err);
     }
 })
+
+router.post("/active/match/:postingID", async (req, res, next) => {
+    try {
+        let posting: Partial<NoShow> = req.body;
+        posting.id = Number(req.params.postingID);
+
+        if (!(posting.id && posting.writer)){
+            throw MissingParameterError;
+        }
+
+        const activeToConvert = await PostingService.getActivePosting(posting.writer, posting.id);
+        const result =  await PostingService.convertToInactive(activeToConvert, InactiveNoShow.REASON_MATCHED);
+        
+        res.json({ id: result.id });
+    } catch (err) {
+        next(err)
+    }
+});
 
 router.post("/active", async (req, res, next) => {
     try {
