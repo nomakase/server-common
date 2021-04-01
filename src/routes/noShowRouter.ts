@@ -23,6 +23,10 @@ router.get("/active/all", async (req, res, next) => {
         if (!(posting.writer && (from >= 0) && (to >= 0))){
             throw MissingParameterError;
         }
+
+        if (from == 0) {
+            await PostingService.checkActive(posting.writer);
+        }
         
         const result =  await PostingService.getAllActivePosting(posting.writer, from, to);
         res.json({ result });
@@ -100,9 +104,7 @@ router.get("/inactive/all", async (req, res, next) => {
         }
 
         if (from == 0) {
-            const actives =  await PostingService.getAllActivePosting(posting.writer, undefined, undefined);
-            await Promise.all(actives.filter((actives) => new Date(actives.to) <= new Date())
-            .map(async (active) => await PostingService.convertToInactive(active)));
+            await PostingService.checkActive(posting.writer);
         }
 
         const result =  await PostingService.getAllInactivePosting(posting.writer, from, to);

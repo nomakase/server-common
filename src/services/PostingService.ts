@@ -1,6 +1,7 @@
 import { InstanceNotFoundError, InvalidParameterError, QueryFailedError } from "../errors";
 import { ActiveNoShow } from "../entities/ActiveNoShow";
 import { InactiveNoShow } from "../entities/InactiveNoShow";
+import DateTime from "../utils/DateTime";
 
 
 export default class PostingService{
@@ -107,25 +108,42 @@ export default class PostingService{
     }
 
     static async convertToInactive(active: ActiveNoShow, reason: 0 | 1 = InactiveNoShow.REASON_EXPIRED){
-        await active.remove()
         const result = await InactiveNoShow.insert({ 
             ...active,
             reason: reason
         });
+        await active.remove();
+
         return { id: result.identifiers[0].id }
     }
 
+    static async checkActive(writer: string) {
+        const actives =  await PostingService.getAllActivePosting(writer, undefined, undefined);
+        
+        return await Promise.all(actives.filter((actives) => {
+            return new Date(DateTime.toUTC(actives.to)) <= new Date(DateTime.nowKST())
+        }).map(async (active) => {
+            return await PostingService.convertToInactive(active)
+        }));
+    }
+
     private static _verifyParams(posting: ActiveNoShow) {
-        if ((posting.salePrice && 
+        try {
+            posting.from = new Date(DateTime.toUTC(posting.from));
+            posting.to = new Date(DateTime.toUTC(posting.to));
+
+            if ((posting.salePrice && 
                 ((Number(posting.salePrice) < 0) || 
                 (Number(posting.salePrice) >= Number(posting.costPrice)))) ||
-            (new Date(posting.to) <= new Date()) || 
+            (posting.to <= new Date(DateTime.nowKST())) || 
             (posting.from >= posting.to) ||
             (Number(posting.minPeople) < 1) ||
             (Number(posting.minPeople) > Number(posting.maxPeople))) {
                 return false;
+            }
+        } catch {
+            return false;
         }
-
         return true;
     }
 }
