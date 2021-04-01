@@ -107,7 +107,7 @@ export default class PostingService{
         }
     }
 
-    static async convertToInactive(active: ActiveNoShow, reason: 0 | 1 = InactiveNoShow.REASON_EXPIRED){
+    static async convertToInactive(active: ActiveNoShow, reason: "EXPIRED" | "MATCHED" = InactiveNoShow.REASON_EXPIRED){
         const result = await InactiveNoShow.insert({ 
             ...active,
             id: undefined,
