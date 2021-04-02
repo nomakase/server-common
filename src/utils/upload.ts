@@ -2,10 +2,21 @@ import multer, { diskStorage } from "multer";
 import path from "path";
 import fs from "fs";
 
+export const UPLOAD_BASE = "/images";
+
+export enum UPLOAD_DIR {
+  ACTIVE_NO_SHOW = "/ActiveNoShow",
+  INACTIVE_NO_SHOW = "/InactiveNoShow"
+}
+
+export enum UPLOAD_FIELD {
+  ACTIVE_NO_SHOW = "activeNoShowPhotos",  
+}
+
 export const mkStorage = (dirName: string = "") => {
   return diskStorage({
     destination: (_req, _file, cb) => {
-      const destination = path.join(__dirname, "../public/images/" + dirName);
+      const destination = path.join(__dirname, `../public${UPLOAD_BASE}/` + dirName);
   
       if (!fs.existsSync(destination)) {
         fs.mkdirSync(destination, { recursive: true });
@@ -22,6 +33,6 @@ export const mkStorage = (dirName: string = "") => {
 
 export const upload = multer({ storage : mkStorage() });
 
-export const uploadTo = (dirName: string) => {
+export const uploadTo = (dirName: UPLOAD_DIR | "" = "") => {
   return multer({ storage : mkStorage(dirName) });
 }
