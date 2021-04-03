@@ -5,6 +5,7 @@ import { ActiveNoShow } from "../entities/ActiveNoShow";
 import { NoShow } from "../entities/NoShow";
 import { MissingParameterError } from "../errors";
 import PostingService from "../services/PostingService";
+import { uploadTo, UPLOAD_DIR, UPLOAD_FIELD } from "../utils/upload";
 
 //default url path: 
 const router =  express.Router();
@@ -70,15 +71,27 @@ router.post("/active/match/:postingID", async (req, res, next) => {
     }
 });
 
-router.post("/active", async (req, res, next) => {
+router.post("/active", uploadTo(UPLOAD_DIR.ACTIVE_NO_SHOW).array(UPLOAD_FIELD.ACTIVE_NO_SHOW, 5), async (req: AuthorizedRequest, res, next) => {
     try {
-        const posting: ActiveNoShow = req.body;
+        let posting: ActiveNoShow = { ...req.body };
+        posting.writer = req.Identifier!.email;
+        
         if (!(posting.costPrice && posting.from && posting.to && posting.maxPeople)){
             throw MissingParameterError;
         }
+        
+        const postingResult = await PostingService.createActivePosting(posting);
 
-        const result = await PostingService.createActivePosting(posting);
-        res.json({ postingID: result.id });
+        let photoIDs: Number[] = [];
+            if (req.files && req.files.length !== 0) {
+                photoIDs = await PostingService.saveActivePhotos(posting.writer, 
+                    postingResult.id, req.files as Express.Multer.File[]);
+        }
+
+        res.json({ 
+            postingID: posting.id,
+            photoIDs: photoIDs
+        });
     } catch (err) {
         next(err);
     }

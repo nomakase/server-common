@@ -2,7 +2,8 @@ import { InstanceNotFoundError, InvalidParameterError, QueryFailedError } from "
 import { ActiveNoShow } from "../entities/ActiveNoShow";
 import { InactiveNoShow } from "../entities/InactiveNoShow";
 import DateTime from "../utils/DateTime";
-
+import { ActiveNoShowPhoto } from "../entities/ActiveNoShowPhoto";
+import { UPLOAD_BASE, UPLOAD_DIR } from "../utils/upload";
 
 export default class PostingService{
 
@@ -15,6 +16,7 @@ export default class PostingService{
             const result = await ActiveNoShow.insert(posting);
             return { id: result.identifiers[0].id }
         } catch (err) {
+            console.log(err)
             throw QueryFailedError;
         }
     }
@@ -73,6 +75,30 @@ export default class PostingService{
         } catch(err) {
             throw QueryFailedError;
         }
+    }
+
+    static async saveActivePhotos(writer: string, postingID: number, files: Express.Multer.File[]) {
+
+        const posting = await PostingService.getActivePosting(writer, postingID);
+             
+        const photos = files.map((file) => {
+            const filePath = `${process.env.MAIN_HOST}:${process.env.PORT}${UPLOAD_BASE}${UPLOAD_DIR.ACTIVE_NO_SHOW}/${file.filename}`
+            const photo = new ActiveNoShowPhoto();
+            photo.filePath = filePath;
+            photo.noShow = posting;
+
+            return photo;
+        });
+
+        const photoIDs = await Promise.all(photos.map(async (photo) => {
+            const res = await ActiveNoShowPhoto.insert(photo);
+            return Number(res.identifiers[0].id);
+        })).catch(() => {
+                throw QueryFailedError;
+            }
+        );
+
+        return photoIDs
     }
 
     static async getInactivePosting(writer: string, postingID: number) {
