@@ -50,7 +50,7 @@ export default class PostingService{
     }
 
     static async getActivePosting(writer: string, postingID: number) {
-        const posting = await ActiveNoShow.findOne({ id:postingID, writer });
+        const posting = await ActiveNoShow.findOne({ id:postingID, writer }, { relations: ["photos"] });
         if (!posting) {
             throw InstanceNotFoundError;
         }
@@ -66,6 +66,7 @@ export default class PostingService{
             }
 
             const postings = await ActiveNoShow.find({
+                relations: ["photos"],
                 where: { writer },
                 order: { id: "ASC" },
                 skip: from,
@@ -73,6 +74,7 @@ export default class PostingService{
             });
             return postings;
         } catch(err) {
+            console.log(err)
             throw QueryFailedError;
         }
     }
