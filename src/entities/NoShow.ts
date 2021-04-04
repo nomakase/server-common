@@ -1,6 +1,6 @@
 import { BaseEntity, Column, PrimaryGeneratedColumn } from "typeorm";
 
-export class NoShow extends BaseEntity {
+export abstract class NoShow extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
