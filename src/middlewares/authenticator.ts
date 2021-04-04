@@ -8,11 +8,11 @@ import { Whitelist } from "../entities/Whitelist";
 
 /**
  * @description verifies access token given from the request 
- * and extracts user's info from decoded access token if the token is valid.
+ * and extracts owner's info from decoded access token if the token is valid.
  * After verifying the token, type of request will be `AuthorizedRequest`, which contains
  * identifier field.  
  */
-async function user(
+async function owner(
   req: Request,
   _res: Response,
   next: NextFunction
@@ -40,6 +40,24 @@ async function user(
   next();
 }
 
+async function user(
+  req: Request,
+  _res: Response,
+  next: NextFunction
+) {
+  const userToken = req.headers.authorization
+  if (!userToken) {
+    return next(NoTokenError);
+  }
+
+  const decoded = JWT.verifyUser(userToken);
+  if (!decoded) {
+    return next(InvalidAccessTokenError);
+  }
+
+  next();
+}
+
 async function admin(
   req: Request,
   _res: Response,
@@ -64,4 +82,4 @@ async function admin(
   next();
 }
 
-export default { user, admin };
+export default { owner, user, admin };
