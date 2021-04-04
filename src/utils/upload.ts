@@ -4,12 +4,12 @@ import fs from "fs";
 
 export const UPLOAD_BASE = "/images";
 
-export enum UPLOAD_DIR {
+export const enum UPLOAD_DIR {
   ACTIVE_NO_SHOW = "/ActiveNoShow",
   INACTIVE_NO_SHOW = "/InactiveNoShow"
 }
 
-export enum UPLOAD_FIELD {
+export const enum UPLOAD_FIELD {
   ACTIVE_NO_SHOW = "activeNoShowPhotos",  
 }
 
