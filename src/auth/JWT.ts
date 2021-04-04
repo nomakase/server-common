@@ -5,6 +5,7 @@ import { AccessTokenPayload, JwtPayload, RefreshTokenPayload } from "@custom-typ
 export default class JWT {
   private static secretKeyA = process.env.ACCESS_SECRET as jwt.Secret;
   private static secretKeyR = process.env.REFRESH_SECRET as jwt.Secret;
+  private static secretKeyU = process.env.USER_SECRET as jwt.Secret;
 
   private static optionsA = {
     expiresIn: process.env.ACCESS_TOKEN_EXPIRE,
@@ -16,6 +17,12 @@ export default class JWT {
     expiresIn: process.env.REFRESH_TOKEN_EXPIRE,
     issuer: process.env.TOKEN_ISSUER,
     subject: process.env.TOKEN_SUBJECT,
+  };
+
+  private static optionsU =  {
+    expiresIn: process.env.USER_TOKEN_EXPIRE,
+    issuer: process.env.TOKEN_ISSUER,
+    subject: process.env.TOKEN_SUBJECT,  
   };
 
   /* ACCESS TOKEN */
@@ -112,6 +119,19 @@ export default class JWT {
     }
 
     return remaining > 0 ? remaining : 0;
+  }
+
+  /* USER_TOKEN */
+  static signUser = () => {
+    return jwt.sign({}, JWT.secretKeyU, JWT.optionsU)
+  }
+
+  static verifyUSer = (token: string) => {
+    try {
+      return jwt.verify(token, JWT.secretKeyU);
+    } catch (error) {
+      return null;
+    }
   }
 
   static signTokenPair = (email: string, deviceID: string) => {
