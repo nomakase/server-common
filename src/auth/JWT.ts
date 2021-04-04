@@ -126,7 +126,7 @@ export default class JWT {
     return jwt.sign({}, JWT.secretKeyU, JWT.optionsU)
   }
 
-  static verifyUSer = (token: string) => {
+  static verifyUser = (token: string) => {
     try {
       return jwt.verify(token, JWT.secretKeyU);
     } catch (error) {
