@@ -30,7 +30,7 @@ app.use("/", (req, _res, next) => {
 
 // Need to authenticate except for the url starting with "sign" or "admin".
 app.use(tokenParser);
-app.use(/^\/(?!sign|admin).*$/, authenticator.user);
+app.use(/^\/(?!sign|admin).*$/, authenticator.owner);
 
 app.use("/signIn", signInRouter);
 app.use("/signUp", signUpRouter);
