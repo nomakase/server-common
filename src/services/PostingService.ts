@@ -58,16 +58,18 @@ export default class PostingService{
         return posting;
     }
 
-    static async getAllActivePosting(writer: string, from?: number, to?: number, select?: (keyof ActiveNoShow)[]) {
+    static async getAllActivePosting(writer?: string, from?: number, to?: number, select?: (keyof ActiveNoShow)[]) {
         try {
             let take = undefined;
             if ((from !== undefined) && (to !== undefined)) {
                 take = to-from;
             }
 
+            const where = writer ? { writer } : undefined
+
             const postings = await ActiveNoShow.find({
                 relations: ["photos"],
-                where: { writer },
+                where: where,
                 order: { id: "ASC" },
                 skip: from,
                 take: take,
