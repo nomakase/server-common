@@ -58,7 +58,7 @@ export default class PostingService{
         return posting;
     }
 
-    static async getAllActivePosting(writer: string, from: number | undefined, to: number | undefined) {
+    static async getAllActivePosting(writer: string, from?: number, to?: number, select?: (keyof ActiveNoShow)[]) {
         try {
             let take = undefined;
             if ((from !== undefined) && (to !== undefined)) {
@@ -71,6 +71,7 @@ export default class PostingService{
                 order: { id: "ASC" },
                 skip: from,
                 take: take,
+                select: select
             });
             return postings;
         } catch(err) {
@@ -147,7 +148,7 @@ export default class PostingService{
     }
 
     static async checkActive(writer: string) {
-        const actives =  await PostingService.getAllActivePosting(writer, undefined, undefined);
+        const actives =  await PostingService.getAllActivePosting(writer);
         
         return await Promise.all(actives.filter((actives) => {
             return new Date(DateTime.toUTC(actives.to)) <= new Date(DateTime.nowKST())
