@@ -9,33 +9,44 @@ const router = express.Router();
 
 router.use(/^\/(?!auth).*$/, authenticator.user);
 
-router.get("/auth", (req, res) => {
-    const accessKey = req.headers[process.env.USER_ACCESS_HEADER as string];
-    if (accessKey !== (process.env.USER_ACCESS_KEY as string)) {
-        throw InvalidAccessTokenError;
+router.get("/auth", (req, res, next) => {
+    try {
+        const accessKey = req.headers[process.env.USER_ACCESS_HEADER as string];
+        if (accessKey !== (process.env.USER_ACCESS_KEY as string)) {
+            throw InvalidAccessTokenError;
+        }
+
+        res.json({
+            accessToken: JWT.signUser()
+        });
+    } catch (err) {
+        next(err);
     }
-
-    res.json({
-        accessToken: JWT.signUser()
-    });
 });
 
+router.get("/noShow/active", async (req, res, next) => {
+    try {
+        const from = Number(req.query.from);
+        const to  = Number(req.query.to);
 
-router.get("/noShow/active", async (req, res, _) => {
-    const from = Number(req.query.from);
-    const to  = Number(req.query.to);
+        const select: (keyof ActiveNoShow)[] = ["id","costPrice","salePrice","from","to","minPeople","maxPeople"];
+        const result = await PostingService.getAllActivePosting(undefined, from, to, select)
 
-    const select: (keyof ActiveNoShow)[] = ["id","costPrice","salePrice","from","to","minPeople","maxPeople"];
-    const result = await PostingService.getAllActivePosting(undefined, from, to, select)
-
-    res.json({ result });
+        res.json({ result });
+    } catch (err) {
+        next(err);
+    }
 });
 
-router.get("/noShow/:postingID", async (req, res, _) => {
-    const postingID = Number(req.params.postingID);
-    const result = await PostingService.getActivePosting(postingID);
+router.get("/noShow/:postingID", async (req, res, next) => {
+    try {
+        const postingID = Number(req.params.postingID);
+        const result = await PostingService.getActivePosting(postingID);
 
-    res.json({ result });
+        res.json({ result });
+    } catch (err) {
+        next(err);
+    }
 });
 
 router.get("/restaurant");
