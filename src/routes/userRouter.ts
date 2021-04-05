@@ -38,7 +38,7 @@ router.get("/noShow/active", async (req, res, next) => {
     }
 });
 
-router.get("/noShow/:postingID", async (req, res, next) => {
+router.get("/noShow/active/:postingID", async (req, res, next) => {
     try {
         const postingID = Number(req.params.postingID);
         const result = await PostingService.getActivePosting(postingID);
