@@ -31,7 +31,12 @@ router.get("/noShow/active", async (req, res, _) => {
     res.json({ result });
 });
 
-router.get("/noShow/:postingID");
+router.get("/noShow/:postingID", async (req, res, _) => {
+    const postingID = Number(req.params.postingID);
+    const result = await PostingService.getActivePosting(postingID);
+
+    res.json({ result });
+});
 
 router.get("/restaurant");
 
