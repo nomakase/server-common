@@ -17,7 +17,8 @@ export default class IoRedis extends Redis<ioRedis.Redis> {
   
         return Math.min(times * 2000, 5000);
       },
-      commandTimeout: 5000
+      commandTimeout: 5000,
+      dropBufferSupport: true
       
     };
   
