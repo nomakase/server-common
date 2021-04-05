@@ -6,6 +6,7 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from "typeorm";
+import { ActiveNoShow } from "./ActiveNoShow";
 import { Manager } from "./Manager";
 import { RestaurantPhoto } from "./RestaurantPhoto";
 import { Time } from "./Time";
@@ -41,4 +42,7 @@ export class Restaurant extends BaseEntity {
 
   @ManyToOne(() => Manager, (manager) => manager.restaurants)
   manager: Manager;
+
+  @OneToMany(() => ActiveNoShow, (active) => active.restaurant)
+  activeNoShows: ActiveNoShow[];
 }
