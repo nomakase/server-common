@@ -46,7 +46,7 @@ router.get("/active/:postingID", async (req, res, next) => {
             throw MissingParameterError;
         }
         
-        const result =  await PostingService.getActivePosting(posting.writer, posting.id);
+        const result =  await PostingService.getActivePosting(posting.id, posting.writer);
         res.json({ result });
     } catch (err) {
         next(err);
@@ -62,7 +62,7 @@ router.post("/active/match/:postingID", async (req, res, next) => {
             throw MissingParameterError;
         }
 
-        const activeToConvert = await PostingService.getActivePosting(posting.writer, posting.id);
+        const activeToConvert = await PostingService.getActivePosting(posting.id, posting.writer);
         const result =  await PostingService.convertToInactive(activeToConvert, InactiveNoShow.REASON_MATCHED);
         
         res.json({ id: result.id });
@@ -75,7 +75,7 @@ router.post("/active", uploadTo(UPLOAD_DIR.ACTIVE_NO_SHOW).array(UPLOAD_FIELD.AC
     try {
         let posting: ActiveNoShow = { ...req.body };
         posting.writer = req.Identifier!.email;
-        
+
         if (!(posting.costPrice && posting.from && posting.to && posting.maxPeople)){
             throw MissingParameterError;
         }
@@ -97,9 +97,11 @@ router.post("/active", uploadTo(UPLOAD_DIR.ACTIVE_NO_SHOW).array(UPLOAD_FIELD.AC
     }
 });
 
-router.put("/active", async (req, res, next) => {
+router.put("/active", async (req: AuthorizedRequest, res, next) => {
     try {
-        const posting: Partial<ActiveNoShow> = req.body;
+        const posting: Partial<ActiveNoShow> = { ...req.body };
+        posting.writer = req.Identifier!.email;
+
         if (!(posting.id)){
             throw MissingParameterError;
         }

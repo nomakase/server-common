@@ -49,7 +49,7 @@ export default class PostingService{
         }
     }
 
-    static async getActivePosting(writer: string, postingID: number) {
+    static async getActivePosting(postingID: number, writer?: string) {
         const posting = await ActiveNoShow.findOne({ id:postingID, writer }, { relations: ["photos"] });
         if (!posting) {
             throw InstanceNotFoundError;
@@ -84,7 +84,7 @@ export default class PostingService{
 
     static async saveActivePhotos(writer: string, postingID: number, files: Express.Multer.File[]) {
 
-        const posting = await PostingService.getActivePosting(writer, postingID);
+        const posting = await PostingService.getActivePosting(postingID, writer);
              
         const photos = files.map((file) => {
             const filePath = `${process.env.MAIN_HOST}:${process.env.PORT}${UPLOAD_BASE}${UPLOAD_DIR.ACTIVE_NO_SHOW}/${file.filename}`
