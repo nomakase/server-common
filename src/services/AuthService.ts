@@ -86,7 +86,7 @@ export default class AuthService {
 
   static async unregisterUser(email: string){
     const userToUnregister = await this.getUser(email);
-    userToUnregister.remove();
+    await userToUnregister.remove();
 
     return true;
   }
