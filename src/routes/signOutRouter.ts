@@ -5,7 +5,7 @@ import { AuthorizedRequest } from "@custom-types/express";
 
 const router = express.Router();
 
-router.use(authenticator.user);
+router.use(authenticator.owner);
 
 router.post("/", async (req, res, next) => {
     try {
