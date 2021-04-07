@@ -2,7 +2,7 @@ import multer, { diskStorage } from "multer";
 import path from "path";
 import fs from "fs";
 
-export const UPLOAD_BASE = "/images";
+export const UPLOAD_BASE = "../public/images";
 
 export const enum UPLOAD_DIR {
   ACTIVE_NO_SHOW = "/ActiveNoShow",
@@ -16,8 +16,8 @@ export const enum UPLOAD_FIELD {
 export const mkStorage = (dirName: string = "") => {
   return diskStorage({
     destination: (_req, _file, cb) => {
-      const destination = path.join(__dirname, `../public${UPLOAD_BASE}/` + dirName);
-  
+      const destination = path.join(__dirname, `${UPLOAD_BASE}/` + dirName);
+
       if (!fs.existsSync(destination)) {
         fs.mkdirSync(destination, { recursive: true });
       }
@@ -35,4 +35,9 @@ export const upload = multer({ storage : mkStorage() });
 
 export const uploadTo = (dirName: UPLOAD_DIR | "" = "") => {
   return multer({ storage : mkStorage(dirName) });
+}
+
+export const deleteFile = (fileName: string, dirName: UPLOAD_DIR | "" = "") => {
+  const file = path.join(__dirname, `${UPLOAD_BASE}/${dirName}/${fileName}`);
+  fs.unlinkSync(file);
 }

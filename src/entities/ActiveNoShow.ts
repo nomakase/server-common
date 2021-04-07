@@ -8,6 +8,6 @@ export class ActiveNoShow extends NoShow {
   @OneToMany(() => ActiveNoShowPhoto, (photos) => photos.noShow)
   photos: ActiveNoShowPhoto[];
 
-  @ManyToOne(() => Restaurant, (restaurant) => restaurant.activeNoShows)
+  @ManyToOne(() => Restaurant, (restaurant) => restaurant.activeNoShows, { onDelete:'CASCADE' })
   restaurant: Restaurant;
 }

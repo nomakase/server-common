@@ -1,6 +1,7 @@
-import { Column, Entity, OneToMany } from "typeorm";
+import { Column, Entity, ManyToOne, OneToMany } from "typeorm";
 import { InactiveNoShowPhoto } from "./InactiveNoShowPhoto";
 import { NoShow } from "./NoShow";
+import { Restaurant } from "./Restaurant";
 
 @Entity()
 export class InactiveNoShow extends NoShow {
@@ -12,4 +13,7 @@ export class InactiveNoShow extends NoShow {
 
   @OneToMany(() => InactiveNoShowPhoto, (photos) => photos.noShow)
   photos: InactiveNoShowPhoto[];
+
+  @ManyToOne(() => Restaurant, (restaurant) => restaurant.inactiveNoShows, { onDelete:'CASCADE' })
+  restaurant: Restaurant;
 }
