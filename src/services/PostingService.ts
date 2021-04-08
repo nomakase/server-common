@@ -4,6 +4,7 @@ import { InactiveNoShow } from "../entities/InactiveNoShow";
 import DateTime from "../utils/DateTime";
 import { ActiveNoShowPhoto } from "../entities/ActiveNoShowPhoto";
 import { UPLOAD_BASE, UPLOAD_DIR } from "../utils/upload";
+import { Restaurant } from "../entities/Restaurant";
 
 export default class PostingService{
 
@@ -63,14 +64,14 @@ export default class PostingService{
         return posting;
     }
 
-    static async getAllActivePosting(writer?: string, from?: number, to?: number, select?: (keyof ActiveNoShow)[]) {
+    static async getAllActivePosting(restaurant?: Restaurant, from?: number, to?: number, select?: (keyof ActiveNoShow)[]) {
         try {
             let take = undefined;
             if ((from !== undefined) && (to !== undefined)) {
                 take = to-from;
             }
 
-            const where = writer ? { writer } : undefined
+            const where = restaurant ? { restaurant } : undefined
 
             const postings = await ActiveNoShow.find({
                 relations: ["photos"],
@@ -120,10 +121,10 @@ export default class PostingService{
         return posting;
     }
 
-    static async getAllInactivePosting(writer: string, from: number, to: number) {
+    static async getAllInactivePosting(restaurant: Restaurant, from: number, to: number) {
         try {
             const postings = await InactiveNoShow.find({
-                where: { writer },
+                where: { restaurant },
                 order: { id: "ASC" },
                 skip: from,
                 take: to-from,
@@ -154,8 +155,8 @@ export default class PostingService{
         return { id: result.identifiers[0].id }
     }
 
-    static async checkActive(writer: string) {
-        const actives =  await PostingService.getAllActivePosting(writer);
+    static async checkActive(restaurant: Restaurant) {
+        const actives =  await PostingService.getAllActivePosting(restaurant);
         
         return await Promise.all(actives.filter((actives) => {
             return new Date(DateTime.toUTC(actives.to)) <= new Date(DateTime.nowKST())
