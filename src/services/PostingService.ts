@@ -50,13 +50,17 @@ export default class PostingService{
         }
     }
 
-    static async getActivePosting(postingID: number, writer?: string) {
+    static async getActivePosting(postingID: number, writer?: string, select?: (keyof ActiveNoShow)[]) {
         const conditions: any = { 
             id: postingID,
             ...(writer ? { writer: writer } : {})
         };
 
-        const posting = await ActiveNoShow.findOne(conditions, { relations: ["photos"] });
+        const posting = await ActiveNoShow.findOne(conditions, { 
+            relations: ["photos", "restaurant"],
+            select: select 
+        });
+        
         if (!posting) {
             throw InstanceNotFoundError;
         }
