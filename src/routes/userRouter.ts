@@ -4,7 +4,7 @@ import JWT from "../auth/JWT";
 import { InvalidAccessTokenError } from "../errors";
 import PostingService from "../services/PostingService";
 import { ActiveNoShow } from "../entities/ActiveNoShow";
-//import RestaurantService from "../services/RestaurantService";
+import RestaurantService from "../services/RestaurantService";
 
 const router = express.Router();
 
@@ -53,18 +53,27 @@ router.get("/noShow/active/:postingID", async (req, res, next) => {
     }
 });
 
-/*
+
 router.get("/restaurant/:restaurant", async (req, res, next) => {
     try {
         const resID = Number(req.params.restaurant);
         const restaurant = await RestaurantService.getRestaurant(resID);
 
-
+        const result = {
+            id: restaurant.id,
+            name: restaurant.name,
+            phoneNumber: restaurant.phoneNumber,
+            address: restaurant.address,
+            description: restaurant.description,
+            openningHour: restaurant.openningHour,
+            breakTime: restaurant.breakTime
+        }
+        res.json({ result });
     } catch (err) {
         next(err);
     }
     
 });
-*/
+
 
 export default router;
