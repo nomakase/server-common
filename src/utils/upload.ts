@@ -97,10 +97,10 @@ async function insertPhotos(photos: (RestaurantPhoto | ActiveNoShowPhoto | Inact
 
 export function createPhotosCallBack(entityType: EntityType) {
   return async (req: Request, res: Response, next: NextFunction) => {
-    if (!req.files || req.files.length === 0) return;
     const { id } = req.body;
-
     if (!id) return next(MissingParameterError);
+
+    if (!req.files || req.files.length === 0) return res.send({ id });
 
     let entity: Restaurant | ActiveNoShow | InactiveNoShow | undefined;
     try {
