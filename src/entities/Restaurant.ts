@@ -48,5 +48,5 @@ export class Restaurant extends BaseEntity {
   activeNoShows: ActiveNoShow[];
 
   @OneToMany(() => InactiveNoShow, (inactive) => inactive.restaurant)
-  inactiveNoShows: ActiveNoShow[];
+  inactiveNoShows: InactiveNoShow[];
 }
