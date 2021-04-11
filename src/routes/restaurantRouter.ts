@@ -1,9 +1,8 @@
 import express from "express";
 import { AuthorizedRequest } from "@custom-types/express";
 import { Restaurant } from "../entities/Restaurant";
-import { RestaurantPhoto } from "../entities/RestaurantPhoto";
 import { MissingParameterError, InvalidPhoneNumberError, DuplicatedPhoneNumberError, InstanceNotFoundError, NoMatchedUserError } from "../errors";
-import { upload } from "../utils/upload"
+import { EntityType, upload, createPhotosCallBack } from "../utils/upload"
 import AuthService from "../services/AuthService";
 import { Manager } from "../entities/Manager";
 
@@ -31,7 +30,7 @@ router.post("/", upload.array("photos", 5), async (req: AuthorizedRequest, _res,
     return next(InvalidPhoneNumberError);
   }
 
-  let restaurantId: number;
+  let id: number;
   try {
     const insertResult = await Restaurant.insert({
       name,
@@ -42,7 +41,7 @@ router.post("/", upload.array("photos", 5), async (req: AuthorizedRequest, _res,
       description,
       manager: user,
     })
-    restaurantId = insertResult.identifiers[0].id;
+    id = insertResult.identifiers[0].id;
   } catch (err) {
     console.error(err);
 
@@ -52,40 +51,10 @@ router.post("/", upload.array("photos", 5), async (req: AuthorizedRequest, _res,
     return;
   }
 
-  req.body.restaurantId = restaurantId;
+  req.body.id = id;
   return next();
 })
-
-router.post("/", async (req, res, next) => {
-  if (!req.files || req.files.length === 0) return;
-
-  const { restaurantId } = req.body;
-
-  let restaurant: Restaurant | undefined;
-  try {
-    restaurant = await Restaurant.findOne({ id: restaurantId });
-    if (!restaurant) throw new Error("Unexpected Error");
-  } catch (error) {
-    return next(error);
-  }
-
-  const photos = (req.files as Express.Multer.File[]).map((file) => {
-    const filePath = `${process.env.MAIN_HOST}:${process.env.PORT}/images/${file.filename}`
-    const photo = new RestaurantPhoto();
-    photo.filePath = filePath;
-    photo.restaurant = restaurant!;
-
-    return photo;
-  })
-
-  try {
-    await Promise.all(photos.map(photo => RestaurantPhoto.insert(photo)));
-  } catch (error) {
-    console.error(error);
-    return next(error);
-  }
-  return res.json({ id: restaurantId })
-})
+router.post("/", createPhotosCallBack(EntityType.Restaurant));
 
 router.put("/", upload.array("photos", 5), async (req, _, next) => {
   const { id, name, phoneNumber, address, openningHour, breakTime, description }: Partial<Restaurant> = req.body;
@@ -111,33 +80,15 @@ router.put("/", upload.array("photos", 5), async (req, _, next) => {
     description: description ? description : restaurantToUpdate.description,
   };
 
-  req.body.updatedRestaurant = updatedRestaurant;
-  return next();
-})
-
-router.put("/", async (req, res, next) => {
-  const { updatedRestaurant, id }: { id: number; updatedRestaurant: Restaurant } = req.body;
-
-  const photos = (req.files as Express.Multer.File[]).map((file) => {
-    const filePath = `${process.env.MAIN_HOST}:${process.env.PORT}/images/${file.filename}`
-    const photo = new RestaurantPhoto();
-    photo.filePath = filePath;
-    photo.restaurant = updatedRestaurant;
-
-    return photo;
-  })
-
   try {
-    await Restaurant.update(id, updatedRestaurant);
-    await Promise.all(photos.map(photo => RestaurantPhoto.insert(photo)));
+    await Restaurant.update(restaurantToUpdate, updatedRestaurant);
   } catch (error) {
     console.log(error);
-    if (error.errno === 1062) {
-      next(DuplicatedPhoneNumberError);
-    }
+    if (error.errno === 1062) return next(DuplicatedPhoneNumberError);
     return next(error);
   }
-  return res.json({ id });
+  return next();
 })
+router.put("/", createPhotosCallBack(EntityType.Restaurant));
 
 export default router;
