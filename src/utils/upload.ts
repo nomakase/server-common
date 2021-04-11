@@ -45,15 +45,6 @@ export const uploadTo = (dirName: UPLOAD_DIR | "" = "") => {
   return multer({ storage: mkStorage(dirName) });
 }
 
-/*
-  1. multer로 form-data 파싱
-  2. photos가 있다면, 알맞는 photos 객체 생성
-    - RestaurantPhoto or ActiveNoShowPhoto or InActiveNoShowPhoto
-  3. photos 객체에 insert
-
-  
-*/
-
 export const enum EntityType { Restaurant, ActiveNoShow, InactiveNoShow }
 
 async function findEntity(entityType: EntityType, id: number) {
