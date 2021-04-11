@@ -56,12 +56,15 @@ router.post("/", upload.array("photos", 5), async (req: AuthorizedRequest, _res,
 })
 router.post("/", createPhotosCallBack(EntityType.Restaurant));
 
-router.put("/", upload.array("photos", 5), async (req, _, next) => {
+router.put("/", upload.array("photos", 5), async (req: AuthorizedRequest, _, next) => {
+  const email = req.Identifier!.email;
+  const user = await Manager.findOne({ email }, { relations: ["restaurants"] });
+  if (!user) return next(NoMatchedUserError);
+  
   const { id, name, phoneNumber, address, openningHour, breakTime, description }: Partial<Restaurant> = req.body;
-
   if (!id) return next(MissingParameterError);
 
-  const restaurantToUpdate = await Restaurant.findOne({ id });
+  const restaurantToUpdate = user.restaurants.find(restaurant => restaurant.id === id);
   if (!restaurantToUpdate) return next(InstanceNotFoundError);
 
   const updatedRestaurant = {
