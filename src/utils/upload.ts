@@ -102,7 +102,7 @@ export function createPhotosCallBack(entityType: EntityType) {
     }
 
     const photos = (req.files as Express.Multer.File[]).map((file) => {
-      const filePath = `${process.env.MAIN_HOST}:${process.env.PORT}${UPLOAD_BASE}/${file.filename}`
+      const filePath = `images/${file.filename}`
       const photo = createPhotoEntity(entity!);
       photo.filePath = filePath;
       setRelation(entity!, photo);
