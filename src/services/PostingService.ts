@@ -4,6 +4,7 @@ import { InactiveNoShow } from "../entities/InactiveNoShow";
 import DateTime from "../utils/DateTime";
 import { ActiveNoShowPhoto } from "../entities/ActiveNoShowPhoto";
 import { UPLOAD_BASE, UPLOAD_DIR } from "../utils/upload";
+import { Restaurant } from "../entities/Restaurant";
 
 export default class PostingService{
 
@@ -49,8 +50,17 @@ export default class PostingService{
         }
     }
 
-    static async getActivePosting(writer: string, postingID: number) {
-        const posting = await ActiveNoShow.findOne({ id:postingID, writer }, { relations: ["photos"] });
+    static async getActivePosting(postingID: number, writer?: string, select?: (keyof ActiveNoShow)[]) {
+        const conditions: any = { 
+            id: postingID,
+            ...(writer ? { writer: writer } : {})
+        };
+
+        const posting = await ActiveNoShow.findOne(conditions, { 
+            relations: ["photos", "restaurant"],
+            select: select 
+        });
+        
         if (!posting) {
             throw InstanceNotFoundError;
         }
@@ -58,19 +68,22 @@ export default class PostingService{
         return posting;
     }
 
-    static async getAllActivePosting(writer: string, from: number | undefined, to: number | undefined) {
+    static async getAllActivePosting(restaurant?: Restaurant, from?: number, to?: number, select?: (keyof ActiveNoShow)[]) {
         try {
             let take = undefined;
             if ((from !== undefined) && (to !== undefined)) {
                 take = to-from;
             }
 
+            const where = restaurant ? { restaurant } : undefined
+
             const postings = await ActiveNoShow.find({
                 relations: ["photos"],
-                where: { writer },
+                where: where,
                 order: { id: "ASC" },
                 skip: from,
                 take: take,
+                select: select
             });
             return postings;
         } catch(err) {
@@ -81,7 +94,7 @@ export default class PostingService{
 
     static async saveActivePhotos(writer: string, postingID: number, files: Express.Multer.File[]) {
 
-        const posting = await PostingService.getActivePosting(writer, postingID);
+        const posting = await PostingService.getActivePosting(postingID, writer);
              
         const photos = files.map((file) => {
             const filePath = `${process.env.MAIN_HOST}:${process.env.PORT}${UPLOAD_BASE}${UPLOAD_DIR.ACTIVE_NO_SHOW}/${file.filename}`
@@ -112,10 +125,10 @@ export default class PostingService{
         return posting;
     }
 
-    static async getAllInactivePosting(writer: string, from: number, to: number) {
+    static async getAllInactivePosting(restaurant: Restaurant, from: number, to: number) {
         try {
             const postings = await InactiveNoShow.find({
-                where: { writer },
+                where: { restaurant },
                 order: { id: "ASC" },
                 skip: from,
                 take: to-from,
@@ -146,8 +159,8 @@ export default class PostingService{
         return { id: result.identifiers[0].id }
     }
 
-    static async checkActive(writer: string) {
-        const actives =  await PostingService.getAllActivePosting(writer, undefined, undefined);
+    static async checkActive(restaurant: Restaurant) {
+        const actives =  await PostingService.getAllActivePosting(restaurant);
         
         return await Promise.all(actives.filter((actives) => {
             return new Date(DateTime.toUTC(actives.to)) <= new Date(DateTime.nowKST())

@@ -3,9 +3,10 @@ import express from "express";
 import { InactiveNoShow } from "../entities/InactiveNoShow";
 import { ActiveNoShow } from "../entities/ActiveNoShow";
 import { NoShow } from "../entities/NoShow";
-import { MissingParameterError } from "../errors";
+import { MissingParameterError, InvalidParameterError } from "../errors";
 import PostingService from "../services/PostingService";
 import { uploadTo, UPLOAD_DIR, UPLOAD_FIELD } from "../utils/upload";
+import RestaurantService from "../services/RestaurantService";
 
 //default url path: 
 const router =  express.Router();
@@ -19,18 +20,24 @@ router.use("/", (req: AuthorizedRequest, _res, next) => {
 router.get("/active/all", async (req, res, next) => {
     try {
         const posting: Partial<NoShow> = req.body;
+        const resID = Number(req.query.restaurant);
         const from = Number(req.query.from);
         const to = Number(req.query.to);
         
-        if (!(posting.writer && (from >= 0) && (to >= 0))){
+        if (!(posting.writer && resID && (from >= 0) && (to >= 0))){
             throw MissingParameterError;
+        }
+        
+        const restaurant = await RestaurantService.getRestaurant(resID);
+        if (restaurant.manager.email !== posting.writer) {
+            throw InvalidParameterError;
         }
 
         if (from == 0) {
-            await PostingService.checkActive(posting.writer);
+            await PostingService.checkActive(restaurant);
         }
         
-        const result =  await PostingService.getAllActivePosting(posting.writer, from, to);
+        const result =  await PostingService.getAllActivePosting(restaurant, from, to);
         res.json({ result });
     } catch (err) {
         next(err);
@@ -46,7 +53,7 @@ router.get("/active/:postingID", async (req, res, next) => {
             throw MissingParameterError;
         }
         
-        const result =  await PostingService.getActivePosting(posting.writer, posting.id);
+        const result =  await PostingService.getActivePosting(posting.id, posting.writer);
         res.json({ result });
     } catch (err) {
         next(err);
@@ -62,7 +69,7 @@ router.post("/active/match/:postingID", async (req, res, next) => {
             throw MissingParameterError;
         }
 
-        const activeToConvert = await PostingService.getActivePosting(posting.writer, posting.id);
+        const activeToConvert = await PostingService.getActivePosting(posting.id, posting.writer);
         const result =  await PostingService.convertToInactive(activeToConvert, InactiveNoShow.REASON_MATCHED);
         
         res.json({ id: result.id });
@@ -73,12 +80,19 @@ router.post("/active/match/:postingID", async (req, res, next) => {
 
 router.post("/active", uploadTo(UPLOAD_DIR.ACTIVE_NO_SHOW).array(UPLOAD_FIELD.ACTIVE_NO_SHOW, 5), async (req: AuthorizedRequest, res, next) => {
     try {
+        const resID = Number(req.body.restaurant);
         let posting: ActiveNoShow = { ...req.body };
         posting.writer = req.Identifier!.email;
-        
-        if (!(posting.costPrice && posting.from && posting.to && posting.maxPeople)){
+
+        if (!(resID && posting.costPrice && posting.from && posting.to && posting.maxPeople)){
             throw MissingParameterError;
         }
+
+        const restaurant = await RestaurantService.getRestaurant(resID);
+        if (restaurant.manager.email !== posting.writer) {
+            throw InvalidParameterError;
+        }
+        posting.restaurant = restaurant;
         
         const postingResult = await PostingService.createActivePosting(posting);
 
@@ -97,9 +111,11 @@ router.post("/active", uploadTo(UPLOAD_DIR.ACTIVE_NO_SHOW).array(UPLOAD_FIELD.AC
     }
 });
 
-router.put("/active", async (req, res, next) => {
+router.put("/active", async (req: AuthorizedRequest, res, next) => {
     try {
-        const posting: Partial<ActiveNoShow> = req.body;
+        const posting: Partial<ActiveNoShow> = { ...req.body };
+        posting.writer = req.Identifier!.email;
+
         if (!(posting.id)){
             throw MissingParameterError;
         }
@@ -128,18 +144,24 @@ router.delete("/active", async (req, res, next) => {
 router.get("/inactive/all", async (req, res, next) => {
     try {
         const posting: Partial<NoShow> = req.body;
+        const resID = Number(req.query.restaurant);
         const from = Number(req.query.from);
         const to = Number(req.query.to);
         
-        if (!(posting.writer && (from >= 0) && (to >= 0))){
+        if (!(resID && posting.writer && (from >= 0) && (to >= 0))){
             throw MissingParameterError;
         }
 
-        if (from == 0) {
-            await PostingService.checkActive(posting.writer);
+        const restaurant = await RestaurantService.getRestaurant(resID);
+        if (restaurant.manager.email !== posting.writer) {
+            throw InvalidParameterError;
         }
 
-        const result =  await PostingService.getAllInactivePosting(posting.writer, from, to);
+        if (from == 0) {
+            await PostingService.checkActive(restaurant);
+        }
+
+        const result =  await PostingService.getAllInactivePosting(restaurant, from, to);
         res.json({ result });
     } catch (err) {
         next(err);

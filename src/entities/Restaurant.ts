@@ -6,6 +6,8 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from "typeorm";
+import { ActiveNoShow } from "./ActiveNoShow";
+import { InactiveNoShow } from "./InactiveNoShow";
 import { Manager } from "./Manager";
 import { RestaurantPhoto } from "./RestaurantPhoto";
 import { Time } from "./Time";
@@ -39,6 +41,12 @@ export class Restaurant extends BaseEntity {
   @Column({ type: "int", default: 0 })
   verfication: number;
 
-  @ManyToOne(() => Manager, (manager) => manager.restaurants)
+  @ManyToOne(() => Manager, (manager) => manager.restaurants, { onDelete:'CASCADE' })
   manager: Manager;
+
+  @OneToMany(() => ActiveNoShow, (active) => active.restaurant)
+  activeNoShows: ActiveNoShow[];
+
+  @OneToMany(() => InactiveNoShow, (inactive) => inactive.restaurant)
+  inactiveNoShows: ActiveNoShow[];
 }

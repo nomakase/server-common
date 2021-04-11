@@ -8,6 +8,7 @@ import signUpRouter from "./routes/signUpRouter";
 import signOutRouter from "./routes/signOutRouter";
 import noShowRouter from "./routes/noShowRouter";
 import adminRouter from "./routes/adminRouter";
+import userRouter from "./routes/userRouter";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 
@@ -28,9 +29,9 @@ app.use("/", (req, _res, next) => {
   next();
 });
 
-// Need to authenticate except for the url starting with "sign" or "admin".
+// Need to authenticate except for the url starting with "sign", "admin", "user".
 app.use(tokenParser);
-app.use(/^\/(?!sign|admin).*$/, authenticator.owner);
+app.use(/^\/(?!sign|admin|user).*$/, authenticator.owner);
 
 app.use("/signIn", signInRouter);
 app.use("/signUp", signUpRouter);
@@ -38,6 +39,7 @@ app.use("/signOut", signOutRouter);
 app.use("/restaurant", restaurantRouter);
 app.use("/noShow", noShowRouter);
 app.use("/admin", adminRouter);
+app.use("/user", userRouter);
 
 addErrorHandlers(app);
 export default app;

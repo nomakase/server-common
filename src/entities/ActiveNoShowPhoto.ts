@@ -4,6 +4,6 @@ import { Photo } from "./Photo";
 
 @Entity()
 export class ActiveNoShowPhoto extends Photo {
-  @ManyToOne(() => ActiveNoShow, (noShow) => noShow.photos)
+  @ManyToOne(() => ActiveNoShow, (noShow) => noShow.photos, { onDelete:'CASCADE' })
   noShow: ActiveNoShow;
 }

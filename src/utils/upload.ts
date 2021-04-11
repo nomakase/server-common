@@ -10,7 +10,7 @@ import { RestaurantPhoto } from "../entities/RestaurantPhoto";
 import { ActiveNoShowPhoto } from "../entities/ActiveNoShowPhoto";
 import { InactiveNoShowPhoto } from "../entities/InactiveNoShowPhoto";
 
-export const UPLOAD_BASE = "/images";
+export const UPLOAD_BASE = "../public/images";
 
 export const enum UPLOAD_DIR {
   ACTIVE_NO_SHOW = "/ActiveNoShow",
@@ -24,7 +24,7 @@ export const enum UPLOAD_FIELD {
 export const mkStorage = (dirName: string = "") => {
   return diskStorage({
     destination: (_req, _file, cb) => {
-      const destination = path.join(__dirname, `../public${UPLOAD_BASE}/` + dirName);
+      const destination = path.join(__dirname, `${UPLOAD_BASE}/` + dirName);
 
       if (!fs.existsSync(destination)) {
         fs.mkdirSync(destination, { recursive: true });
@@ -128,4 +128,8 @@ export function createPhotosCallBack(entityType: EntityType) {
 
     return res.json({ id })
   };
+}
+export const deleteFile = (fileName: string, dirName: UPLOAD_DIR | "" = "") => {
+  const file = path.join(__dirname, `${UPLOAD_BASE}/${dirName}/${fileName}`);
+  fs.unlinkSync(file);
 }
