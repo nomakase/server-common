@@ -13,8 +13,8 @@ import { InactiveNoShowPhoto } from "../entities/InactiveNoShowPhoto";
 export const UPLOAD_BASE = "../public/images";
 
 export const enum UPLOAD_DIR {
-  ACTIVE_NO_SHOW = "/ActiveNoShow",
-  INACTIVE_NO_SHOW = "/InactiveNoShow"
+  ACTIVE_NO_SHOW = "/NoShow",
+  INACTIVE_NO_SHOW = "/NoShow"
 }
 
 export const enum UPLOAD_FIELD {

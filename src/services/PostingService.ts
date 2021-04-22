@@ -5,6 +5,7 @@ import DateTime from "../utils/DateTime";
 import { ActiveNoShowPhoto } from "../entities/ActiveNoShowPhoto";
 import { UPLOAD_BASE, UPLOAD_DIR } from "../utils/upload";
 import { Restaurant } from "../entities/Restaurant";
+import { InactiveNoShowPhoto } from "../entities/InactiveNoShowPhoto";
 
 export default class PostingService{
 
@@ -154,9 +155,19 @@ export default class PostingService{
             id: undefined,
             reason: reason
         });
+
+        const inactiveID = result.identifiers[0].id;
+        await Promise.all(active.photos.map(async (activePhoto) => {
+            await InactiveNoShowPhoto.insert({
+                ...activePhoto,
+                noShow: inactiveID
+            });
+            await activePhoto.remove();
+        }));
+
         await active.remove();
 
-        return { id: result.identifiers[0].id }
+        return { id: inactiveID }
     }
 
     static async checkActive(restaurant: Restaurant) {
