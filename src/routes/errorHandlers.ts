@@ -1,6 +1,8 @@
 import express from "express";
 import { ErrorResponse } from "@custom-types/express";
 import { CustomError } from "../errors/CustomError";
+import { MulterError } from "multer";
+import { InvalidFileSize } from "src/errors";
 
 export default function addErrorHandlers(app: express.Application) {
   /* 404 ERROR */
@@ -16,6 +18,11 @@ export default function addErrorHandlers(app: express.Application) {
 
   // Handle unexpected error
   app.use((err: Error, _req: express.Request, _res: express.Response, next: express.NextFunction) => {
+    if (err instanceof MulterError) {
+      console.error(err);
+      if (err.code = "LIMIT_FILE_SIZE") return next(InvalidFileSize);
+    }
+
     if (!(err instanceof CustomError)){
       // TODO: Write to log file
       console.error("Unhandled Error occured.");
