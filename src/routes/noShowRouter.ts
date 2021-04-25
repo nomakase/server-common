@@ -3,9 +3,9 @@ import express from "express";
 import { InactiveNoShow } from "../entities/InactiveNoShow";
 import { ActiveNoShow } from "../entities/ActiveNoShow";
 import { NoShow } from "../entities/NoShow";
-import { MissingParameterError, InvalidParameterError } from "../errors";
+import { MissingParameterError, InvalidParameterError, PhotoMaxExceededError } from "../errors";
 import PostingService from "../services/PostingService";
-import { uploadTo, UPLOAD_DIR, UPLOAD_FIELD } from "../utils/upload";
+import { uploadTo, UPLOAD_DIR, UPLOAD_FIELD, deleteFile } from "../utils/upload";
 import RestaurantService from "../services/RestaurantService";
 
 //default url path: 
@@ -111,13 +111,68 @@ router.post("/active", uploadTo(UPLOAD_DIR.ACTIVE_NO_SHOW).array(UPLOAD_FIELD.AC
     }
 });
 
-router.put("/active", async (req: AuthorizedRequest, res, next) => {
+router.put("/active", uploadTo(UPLOAD_DIR.ACTIVE_NO_SHOW).array(UPLOAD_FIELD.ACTIVE_NO_SHOW, 5), async (req: AuthorizedRequest, res, next) => {
     try {
         const posting: Partial<ActiveNoShow> = { ...req.body };
+        const photoToDelete: number[] = req.body.photoToDelete || [];
+        const uploadedPhotos = req.files as Express.Multer.File[];
         posting.writer = req.Identifier!.email;
 
         if (!(posting.id)){
             throw MissingParameterError;
+        }
+
+        if (!(Array.isArray(photoToDelete))) {
+            uploadedPhotos.forEach((photo) => {
+                deleteFile(photo.filename, UPLOAD_DIR.ACTIVE_NO_SHOW);
+            });
+            throw InvalidParameterError;
+        }
+        
+        // Check the number of photos.
+        const postingToUpdate = await PostingService.getActivePosting(posting.id, posting.writer);
+        const existingPhotos  = postingToUpdate.photos;
+        if (existingPhotos.length - photoToDelete.length + uploadedPhotos.length > 5) {
+            uploadedPhotos.forEach((photo) => {
+                deleteFile(photo.filename, UPLOAD_DIR.ACTIVE_NO_SHOW);
+            });
+            throw PhotoMaxExceededError;
+        }
+
+        // Validate photo id to delete.
+        photoToDelete.forEach(id => {
+            const photoToUpdate = existingPhotos.find(existing => existing.id === id);
+            if (!photoToUpdate) {
+                uploadedPhotos.forEach((photo) => {
+                    deleteFile(photo.filename, UPLOAD_DIR.ACTIVE_NO_SHOW);
+                });
+                throw InvalidParameterError;
+            }
+        })
+
+        // Update photos.
+        let updated = 0;
+        await Promise.all(photoToDelete.map(async (photoID, idx) => {
+            if(idx < uploadedPhotos.length) {
+                const photoToUpdate = existingPhotos.find(existing => existing.id === photoID)!;
+
+                photoToUpdate.filePath = uploadedPhotos[idx].filename;
+                await photoToUpdate.save();
+                updated = idx + 1;
+            }
+                
+        }))
+        
+        if (uploadedPhotos.length < photoToDelete.length) {
+            const photoIDsToDelete = photoToDelete.slice(updated);
+            await Promise.all(photoIDsToDelete.map(async (photoID) => {
+                const photo = existingPhotos.find(existing => existing.id === photoID)!;
+                await photo.remove();
+            }));
+        }
+
+        if (uploadedPhotos.length > photoToDelete.length) {
+            await PostingService.saveActivePhotos(postingToUpdate.writer, postingToUpdate.id, uploadedPhotos.slice(updated))
         }
 
         const result = await PostingService.updateActivePosting(posting);        
