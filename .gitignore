@@ -109,3 +109,4 @@ src/public/images/*
 # Script files
 *.sh
 scratch.ts
+*.http
