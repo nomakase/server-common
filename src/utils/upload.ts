@@ -5,7 +5,7 @@ import { Request, Response, NextFunction } from "express";
 import { Restaurant } from "../entities/Restaurant";
 import { ActiveNoShow } from "../entities/ActiveNoShow";
 import { InactiveNoShow } from "../entities/InactiveNoShow";
-import { InstanceNotFoundError, InvalidFileFormat, InvalidFileSize, MissingParameterError } from "../errors";
+import { InstanceNotFoundError, InvalidFileFormat, MissingParameterError } from "../errors";
 import { RestaurantPhoto } from "../entities/RestaurantPhoto";
 import { ActiveNoShowPhoto } from "../entities/ActiveNoShowPhoto";
 import { InactiveNoShowPhoto } from "../entities/InactiveNoShowPhoto";
@@ -41,7 +41,6 @@ export const mkStorage = (dirName: string = "") => {
 
 const fileFilter = (_req: Request, file: Express.Multer.File, callback: multer.FileFilterCallback) => {
   if (!isValidFileFormat(file)) return callback(InvalidFileFormat);
-  if (!isValidFileSize(file)) return callback(InvalidFileSize);
   return callback(null, true);
 }
 
@@ -52,16 +51,12 @@ function isValidFileFormat(file: Express.Multer.File) {
   return false;
 }
 
-function isValidFileSize(file: Express.Multer.File) {
-  const mb = 1000 * 1024;
-
-  if (file.size > 40 * mb) return false;
-  return true;
-}
-
 export const upload = multer({
   storage: mkStorage(),
   fileFilter,
+  limits: {
+    fileSize: 1 * 1000 * 1024,
+  },
 });
 
 export const uploadTo = (dirName: UPLOAD_DIR | "" = "") => {
