@@ -60,11 +60,11 @@ router.put("/", upload.array("photos", 5), async (req: AuthorizedRequest, _, nex
   const email = req.Identifier!.email;
   const user = await Manager.findOne({ email }, { relations: ["restaurants"] });
   if (!user) return next(NoMatchedUserError);
-  
+
   const { id, name, phoneNumber, address, openningHour, breakTime, description }: Partial<Restaurant> = req.body;
   if (!id) return next(MissingParameterError);
 
-  const restaurantToUpdate = user.restaurants.find(restaurant => restaurant.id === id);
+  const restaurantToUpdate = user.restaurants.find(restaurant => restaurant.id === Number(id));
   if (!restaurantToUpdate) return next(InstanceNotFoundError);
 
   const updatedRestaurant = {
