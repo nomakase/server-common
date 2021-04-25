@@ -10,7 +10,7 @@ const router = express.Router();
 
 router.get("/", async (req: AuthorizedRequest, res, next) => {
   const email = req.Identifier!.email;
-  const user = await Manager.findOne({ email }, { relations: ["restaurants"] });
+  const user = await Manager.findOne({ email }, { relations: ["restaurants", "restaurants.photos"] });
   if (!user) return next(NoMatchedUserError);
 
   res.json(user.restaurants);
