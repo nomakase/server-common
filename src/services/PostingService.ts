@@ -29,14 +29,23 @@ export default class PostingService{
             throw InstanceNotFoundError;
         }
         
-        const updatedPosting = { ...postingToUpdate, ...posting } as ActiveNoShow;
+        const updatedPosting = { 
+            ...postingToUpdate,
+            costPrice: posting.costPrice? posting.costPrice : postingToUpdate.costPrice,
+            salePrice: posting.salePrice? posting.salePrice : postingToUpdate.salePrice,
+            from: posting.from? posting.from : postingToUpdate.from,
+            to: posting.to? posting.to : postingToUpdate.to,
+            minPeople: posting.minPeople? posting.minPeople : postingToUpdate.minPeople,
+            maxPeople: posting.maxPeople? posting.maxPeople : postingToUpdate.maxPeople,
+            description: posting.description? posting.description : postingToUpdate.description
+        } as ActiveNoShow;
         if (!this._verifyParams(updatedPosting)) {
             throw InvalidParameterError;
         }
 
         try {
-            const updateResult = await ActiveNoShow.save(updatedPosting);
-            return { id: updateResult.id };
+            await ActiveNoShow.update(updatedPosting.id, updatedPosting);
+            return { id: updatedPosting.id };
         } catch(err) {
             throw QueryFailedError;
         }

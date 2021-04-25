@@ -21,3 +21,4 @@ export const InstanceNotFoundError = new CustomError("InstanceNotFoundError", 50
 export const DuplicatedEmailError = new CustomError("Duplicated Email", 500, 5001, "Inputed email has already taken");
 export const DuplicatedPhoneNumberError = new CustomError("Duplicated Phone Number", 500, 5002, "Inputed phone number has already taken");
 export const QueryFailedError = new CustomError("QueryFailedError", 500, 5003, "Fail to execute query.");
+export const PhotoMaxExceededError = new CustomError("PhotoMaxExceededError", 500, 5004, "Photos can be saved up to 5.");
