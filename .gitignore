@@ -110,3 +110,4 @@ src/public/images/*
 *.sh
 scratch.ts
 *.http
+.DS_Store
