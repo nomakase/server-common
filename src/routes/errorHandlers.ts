@@ -2,7 +2,7 @@ import express from "express";
 import { ErrorResponse } from "@custom-types/express";
 import { CustomError } from "../errors/CustomError";
 import { MulterError } from "multer";
-import { InvalidFileSize } from "src/errors";
+import { InvalidFileSize } from "../errors";
 
 export default function addErrorHandlers(app: express.Application) {
   /* 404 ERROR */
