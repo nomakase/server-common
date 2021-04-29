@@ -45,10 +45,9 @@ const fileFilter = (_req: Request, file: Express.Multer.File, callback: multer.F
 }
 
 function isValidFileFormat(file: Express.Multer.File) {
-  const ext = path.extname(file.originalname);
+  const reg = /\.(jpe?g|png|JPE?G)$/i;
 
-  if (ext == '.png' || ext == '.jpeg' || ext == '.jpg') return true;
-  return false;
+  return reg.test(file.originalname);
 }
 
 export const upload = multer({
