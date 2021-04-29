@@ -31,6 +31,10 @@ router.get("/noShow/active", async (req, res, next) => {
         const to  = Number(req.query.to);
         const orderBy = String(req.query.orderBy);
 
+        if (from == 0) {
+            await PostingService.checkActive();
+        }
+
         const select: (keyof ActiveNoShow)[] = ["id","costPrice","salePrice","from","to","minPeople","maxPeople", "discountRate"];
         const result = await PostingService.getAllActivePosting(undefined, from, to, select, orderBy);
 
