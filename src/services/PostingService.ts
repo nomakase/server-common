@@ -14,6 +14,8 @@ export default class PostingService{
             throw InvalidParameterError;
         }
 
+        this._correctParams(posting);
+        
         try {
             const result = await ActiveNoShow.insert(posting);
             return { id: result.identifiers[0].id }
@@ -42,6 +44,8 @@ export default class PostingService{
         if (!this._verifyParams(updatedPosting)) {
             throw InvalidParameterError;
         }
+
+        this._correctParams(updatedPosting);
 
         try {
             await ActiveNoShow.update(updatedPosting.id, updatedPosting);
@@ -78,7 +82,7 @@ export default class PostingService{
         return posting;
     }
 
-    static async getAllActivePosting(restaurant?: Restaurant, from?: number, to?: number, select?: (keyof ActiveNoShow)[]) {
+    static async getAllActivePosting(restaurant?: Restaurant, from?: number, to?: number, select?: (keyof ActiveNoShow)[], order?: (keyof ActiveNoShow)[]) {
         try {
             let take = undefined;
             if ((from !== undefined) && (to !== undefined)) {
@@ -87,6 +91,12 @@ export default class PostingService{
 
             const where = restaurant ? { restaurant } : undefined
 
+            order;
+            /*
+            const order = {
+
+            };
+            */
             const postings = await ActiveNoShow.find({
                 relations: ["photos"],
                 where: where,
@@ -195,7 +205,8 @@ export default class PostingService{
             posting.to = new Date(DateTime.toUTC(posting.to));
 
             if ((posting.salePrice && 
-                ((Number(posting.salePrice) < 0) || 
+                (isNaN(posting.salePrice) || 
+                (Number(posting.salePrice) < 0) || 
                 (Number(posting.salePrice) >= Number(posting.costPrice)))) ||
             (posting.to <= new Date(DateTime.nowKST())) || 
             (posting.from >= posting.to) ||
@@ -206,6 +217,20 @@ export default class PostingService{
         } catch {
             return false;
         }
+
         return true;
+    }
+
+    
+    private static _correctParams(posting: ActiveNoShow) {
+
+        // Calc discount rate.
+        if ((posting.salePrice === undefined) || isNaN(posting.salePrice)) {
+            posting.discountRate = 0
+        } else {
+            posting.discountRate = (posting.costPrice - posting.salePrice) / posting.costPrice * 100;
+        }
+
+        console.log("disc rate : " + posting.discountRate)
     }
 }

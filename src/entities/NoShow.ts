@@ -14,6 +14,9 @@ export abstract class NoShow extends BaseEntity {
   salePrice: number;
 
   @Column()
+  discountRate: number;
+
+  @Column()
   from: Date;
 
   @Column()
