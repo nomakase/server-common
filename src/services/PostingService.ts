@@ -113,7 +113,7 @@ export default class PostingService{
         const posting = await PostingService.getActivePosting(postingID, writer);
              
         const photos = files.map((file) => {
-            const filePath = `${process.env.MAIN_HOST}:${process.env.PORT}${UPLOAD_BASE}${UPLOAD_DIR.ACTIVE_NO_SHOW}/${file.filename}`
+            const filePath = `${UPLOAD_BASE}${UPLOAD_DIR.ACTIVE_NO_SHOW}/${file.filename}`
             const photo = new ActiveNoShowPhoto();
             photo.filePath = filePath;
             photo.noShow = posting;
@@ -185,7 +185,7 @@ export default class PostingService{
         return { id: inactiveID }
     }
 
-    static async checkActive(restaurant: Restaurant) {
+    static async checkActive(restaurant?: Restaurant) {
         const actives =  await PostingService.getAllActivePosting(restaurant);
         
         return await Promise.all(actives.filter((actives) => {
