@@ -82,7 +82,7 @@ export default class PostingService{
         return posting;
     }
 
-    static async getAllActivePosting(restaurant?: Restaurant, from?: number, to?: number, select?: (keyof ActiveNoShow)[], order?: (keyof ActiveNoShow)[]) {
+    static async getAllActivePosting(restaurant?: Restaurant, from?: number, to?: number, select?: (keyof ActiveNoShow)[], orderBy?: string) {
         try {
             let take = undefined;
             if ((from !== undefined) && (to !== undefined)) {
@@ -91,16 +91,12 @@ export default class PostingService{
 
             const where = restaurant ? { restaurant } : undefined
 
-            order;
-            /*
-            const order = {
+            const order: any = orderBy ? this._getOrder(orderBy) ? this._getOrder(orderBy) : { id: "ASC" } : { id: "ASC" };
 
-            };
-            */
             const postings = await ActiveNoShow.find({
                 relations: ["photos"],
                 where: where,
-                order: { id: "ASC" },
+                order: order,
                 skip: from,
                 take: take,
                 select: select
@@ -220,7 +216,6 @@ export default class PostingService{
 
         return true;
     }
-
     
     private static _correctParams(posting: ActiveNoShow) {
 
@@ -232,5 +227,17 @@ export default class PostingService{
         }
 
         console.log("disc rate : " + posting.discountRate)
+    }
+
+    private static _getOrder(orderBy: string) {
+
+        const filters: Record<string, Record<string, "ASC" | "DESC">> = {
+            "from": { from: "ASC" },
+            "to": { to: "ASC" },
+            "salePrice": { salePrice: "ASC" },
+            "discountRate": { discountRate: "DESC" }
+        }
+
+        return filters[orderBy];
     }
 }

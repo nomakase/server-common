@@ -29,9 +29,10 @@ router.get("/noShow/active", async (req, res, next) => {
     try {
         const from = Number(req.query.from);
         const to  = Number(req.query.to);
+        const orderBy = String(req.query.orderBy);
 
-        const select: (keyof ActiveNoShow)[] = ["id","costPrice","salePrice","from","to","minPeople","maxPeople"];
-        const result = await PostingService.getAllActivePosting(undefined, from, to, select)
+        const select: (keyof ActiveNoShow)[] = ["id","costPrice","salePrice","from","to","minPeople","maxPeople", "discountRate"];
+        const result = await PostingService.getAllActivePosting(undefined, from, to, select, orderBy);
 
         res.json({ result });
     } catch (err) {
