@@ -144,6 +144,7 @@ export default class PostingService{
     static async getAllInactivePosting(restaurant: Restaurant, from: number, to: number) {
         try {
             const postings = await InactiveNoShow.find({
+                relations: ["photos"],
                 where: { restaurant },
                 order: { id: "ASC" },
                 skip: from,
