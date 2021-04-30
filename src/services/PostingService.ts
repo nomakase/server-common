@@ -113,7 +113,7 @@ export default class PostingService{
         const posting = await PostingService.getActivePosting(postingID, writer);
              
         const photos = files.map((file) => {
-            const filePath = `${UPLOAD_BASE}${UPLOAD_DIR.ACTIVE_NO_SHOW}/${file.filename}`
+            const filePath = `${UPLOAD_BASE}${UPLOAD_DIR.ACTIVE_NO_SHOW}${file.filename}`
             const photo = new ActiveNoShowPhoto();
             photo.filePath = filePath;
             photo.noShow = posting;
