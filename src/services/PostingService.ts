@@ -204,7 +204,7 @@ export default class PostingService{
             if ((posting.salePrice && 
                 (isNaN(posting.salePrice) || 
                 (Number(posting.salePrice) < 0) || 
-                (Number(posting.salePrice) >= Number(posting.costPrice)))) ||
+                (Number(posting.salePrice) > Number(posting.costPrice)))) ||
             (posting.to <= new Date(DateTime.nowKST())) || 
             (posting.from >= posting.to) ||
             (Number(posting.minPeople) < 1) ||
@@ -221,13 +221,13 @@ export default class PostingService{
     private static _correctParams(posting: ActiveNoShow) {
 
         // Calc discount rate.
-        if ((posting.salePrice === undefined) || isNaN(posting.salePrice)) {
-            posting.discountRate = 0
-        } else {
-            posting.discountRate = (posting.costPrice - posting.salePrice) / posting.costPrice * 100;
-        }
-
-        console.log("disc rate : " + posting.discountRate)
+        if ((posting.salePrice === undefined) || 
+            (posting.salePrice === null) || 
+            isNaN(posting.salePrice)) {
+            posting.salePrice = posting.costPrice;
+        } 
+        
+        posting.discountRate = (posting.costPrice - posting.salePrice) / posting.costPrice * 100;
     }
 
     private static _getOrder(orderBy: string) {
