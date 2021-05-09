@@ -112,30 +112,27 @@ router.post("/active", uploadTo(UPLOAD_DIR.ACTIVE_NO_SHOW).array(UPLOAD_FIELD.AC
 });
 
 router.put("/active", uploadTo(UPLOAD_DIR.ACTIVE_NO_SHOW).array(UPLOAD_FIELD.ACTIVE_NO_SHOW, 5), async (req: AuthorizedRequest, res, next) => {
-    try {
-        const posting: Partial<ActiveNoShow> = { ...req.body };
-        const photoToDelete: number[] = req.body.photoToDelete as number[] || [] ;
-        const uploadedPhotos = req.files as Express.Multer.File[];
-        posting.writer = req.Identifier!.email;
+    const posting: Partial<ActiveNoShow> = { ...req.body };
+    const photoToDelete: number[] = req.body.photoToDelete as number[] || [] ;
+    const uploadedPhotos = req.files as Express.Multer.File[];
+    posting.writer = req.Identifier!.email;
+    let isPostingUpdated = false;
+    let originPosting: ActiveNoShow | undefined;
 
+    try {
         if (!(posting.id)){
             throw MissingParameterError;
         }
 
         if (!(Array.isArray(photoToDelete))) {
-            uploadedPhotos.forEach((photo) => {
-                deleteFile(photo.filename, UPLOAD_DIR.ACTIVE_NO_SHOW);
-            });
             throw InvalidParameterError;
         }
 
         // Check the number of photos.
         const postingToUpdate = await PostingService.getActivePosting(posting.id, posting.writer);
+        originPosting = postingToUpdate;
         const existingPhotos  = postingToUpdate.photos;
         if (existingPhotos.length - photoToDelete.length + uploadedPhotos.length > 5) {
-            uploadedPhotos.forEach((photo) => {
-                deleteFile(photo.filename, UPLOAD_DIR.ACTIVE_NO_SHOW);
-            });
             throw PhotoMaxExceededError;
         }
 
@@ -143,12 +140,13 @@ router.put("/active", uploadTo(UPLOAD_DIR.ACTIVE_NO_SHOW).array(UPLOAD_FIELD.ACT
         photoToDelete.forEach(id => {
             const photoToUpdate = existingPhotos.find(existing => Number(existing.id) === Number(id));
             if (!photoToUpdate) {
-                uploadedPhotos.forEach((photo) => {
-                    deleteFile(photo.filename, UPLOAD_DIR.ACTIVE_NO_SHOW);
-                });
                 throw InvalidParameterError;
             }
         })
+
+        // Update posting.
+        const result = await PostingService.updateActivePosting(posting);
+        isPostingUpdated = true;
 
         // Update photos.
         let updated = 0;
@@ -175,9 +173,19 @@ router.put("/active", uploadTo(UPLOAD_DIR.ACTIVE_NO_SHOW).array(UPLOAD_FIELD.ACT
             await PostingService.saveActivePhotos(postingToUpdate.writer, postingToUpdate.id, uploadedPhotos.slice(updated))
         }
 
-        const result = await PostingService.updateActivePosting(posting);
         res.json({ postingID: result.id });
     } catch (err) {
+
+        // Delete newly saved photos.
+        uploadedPhotos.forEach((photo) => {
+            deleteFile(photo.filename, UPLOAD_DIR.ACTIVE_NO_SHOW);
+        });
+
+        // Roll-back updated ActiveNoShow.
+        if (isPostingUpdated && originPosting) {
+            await originPosting.save();
+        }
+
         next(err);
     }
 });
